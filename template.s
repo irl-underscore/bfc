@@ -1,5 +1,5 @@
 .section .bss
-    .lcomm data, $(data_size)
+    .lcomm data, $(tape_size)
 
 .section .text
 .global _start

@@ -49,6 +49,13 @@ void dyn_array_emplace_back(dyn_array *arr, void *obj)
     memmove(arr->data + arr->index, obj, arr->obj_size);
 }
 
+void *dyn_array_get(dyn_array *arr, size_t index)
+{
+    if (!arr || index >= arr->capacity) return NULL;
+
+    return &arr->data[index * arr->obj_size];
+}
+
 void dyn_array_destroy(dyn_array *arr)
 {
     if (arr) free(arr);
