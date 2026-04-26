@@ -3,7 +3,6 @@
 *.a
 *.bat
 
-STRUCTURE.md
 build/
 
 # temporary
