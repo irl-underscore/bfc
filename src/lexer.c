@@ -76,6 +76,8 @@ void pitch_template(char *assembled_code, char *template_file, char *output_file
     size_t tape_len = strlen(tape_tag);
     while (fgets(line, sizeof(line), in))
     {
+        if (line[0] == '#' || line[0] == '\n') continue;
+
         char *tag_pos = strstr(line, tape_tag);
         if (tag_pos)
         {
