@@ -38,7 +38,7 @@ $(DEBUG): $(OBJS) | $(DEBUG_DIR)
 	$(CC) $(CFLAGS) $(DBFLAGS) $^ -o $@
 
 release: $(OBJS) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(RELFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(RELFLAGS) $^ -o $(RELEASE)
 
 $(PROJECT_BAT): | $(TEST_DIR)
 	$(call MKFILE,$@)
