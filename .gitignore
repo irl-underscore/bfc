@@ -3,6 +3,8 @@
 *.a
 *.bat
 
+*.txt
+
 build/
 
 # temporary
