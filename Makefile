@@ -11,9 +11,9 @@ else
 endif
 
 CC = clang
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -std=c99
 RELFLAGS = -O3
-BDFLAGS = -Od
+DBFLAGS = -Od
 
 BUILD_DIR = build
 OBJ_DIR = $(BUILD_DIR)/obj
