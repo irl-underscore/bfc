@@ -26,34 +26,43 @@ dyn_array *dyn_array_create(size_t initial_size, size_t obj_size)
     return arr;
 }
 
-static void dyn_array_resize(dyn_array *arr)
+dyn_array *dyn_array_resize(dyn_array *arr)
 {
-    size_t new_size = sizeof(dyn_array) + arr->capacity * 1.5;
-    new_size = ALIGN_UP(new_size, arr->obj_size);
-    void *temp_arr = realloc(arr, new_size);
-    if (!temp_arr) return;
+    size_t new_capacity = arr->capacity * 2;
+    size_t total_bytes = sizeof(dyn_array) + (new_capacity * arr->obj_size);
 
-    arr = temp_arr;
-    arr->capacity = new_size;
+    dyn_array *temp = realloc(arr, total_bytes);
+    if (!temp) return arr;
+
+    temp->capacity = new_capacity;
+    return temp;
 }
 
 void dyn_array_emplace_back(dyn_array *arr, void *obj)
 {
     if (!arr || !obj) return;
 
-    if (arr->index + 1 >= arr->capacity)
-    {
-        dyn_array_resize(arr);
-    }
+    if (arr->index >= arr->capacity) arr = dyn_array_resize(arr);
 
-    memmove(arr->data + arr->index, obj, arr->obj_size);
+
+    void *dest = (unsigned char*)arr->data + (arr->index * arr->obj_size);
+    memcpy(dest, obj, arr->obj_size);
+
+    arr->index++;
+}
+
+size_t dyn_array_get_size(dyn_array *arr)
+{
+    if (arr) return arr->index;
+
+    return arr->index;
 }
 
 void *dyn_array_get(dyn_array *arr, size_t index)
 {
-    if (!arr || index >= arr->capacity) return NULL;
+    if (!arr || index >= arr->index) return NULL;
 
-    return &arr->data[index * arr->obj_size];
+    return (unsigned char*)arr->data + (index * arr->obj_size);
 }
 
 void dyn_array_destroy(dyn_array *arr)

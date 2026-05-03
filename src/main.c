@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "file.h"
+#include "dyn_array.h"
+#include "lexer.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,7 +17,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error: Couldn't load file into buffer");
     }
 
-    printf("%s", buf->data);
-
+    dyn_array *operations = parse_file(buf);
+    char *code = assemble(operations, 0);
+    pitch_template(code, "template.s", "out.s");
     return 0;
 }

@@ -5,7 +5,7 @@
 .global _start
 _start:
     lea  data(%rip), %rbx
-    $(code)
+$(code)
     movq $60, %rax
     xorq %rdi, %rdi
     syscall

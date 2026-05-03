@@ -1,5 +1,7 @@
 #ifndef FILE_H
 #define FILE_H
+#include "error.h"
+
 #include <stdint.h>
 
 typedef struct file_buf

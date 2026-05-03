@@ -17,9 +17,9 @@
 typedef struct string string;
 
 string *string_create(size_t initial_size);
-string *string_copy(char *data);
+string *string_copy(const char *data);
 static void string_realloc(string *str, size_t target_size) __attribute__((always_inline));
-void string_append_string(string *str, char *data);
+void string_append_string(string *str, const char *data);
 void stirng_append_char(string *str, char c);
 char *string_get_raw(string *str);
 void string_destroy(string *str);
