@@ -51,5 +51,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 $(BUILD_DIR) $(DEBUG_DIR) $(OBJ_DIR) $(TEST_DIR):
 	$(call MKDIR,$@)
 
+run: $(DEBUG)
+	@$(subst /,\,$(DEBUG))$(EXE) main.bf  & echo Program finished with exit code: %errorlevel%
+
 clean:
 	$(call CLEAN,$(BUILD_DIR))
