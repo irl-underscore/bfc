@@ -1,7 +1,5 @@
 #include <stdio.h>
 
-#include "file.h"
-#include "dyn_array.h"
 #include "lexer.h"
 
 int main(int argc, char *argv[])
