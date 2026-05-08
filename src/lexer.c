@@ -40,18 +40,15 @@ static void iterate_arythmic(dyn_array *optimized, dyn_array *operations, int *i
 {
     int count = 0;
     size_t size = dyn_array_get_size(operations);
-    printf("Size: %llu\n", size);
     for (; (size_t)(*i) < size; (*i)++)
     {
         operation op = *(operation*)dyn_array_get(operations, *i);
         if (op.type == OP_INC)
         {
             count++;
-            printf("\tIncreasing count to %i\n", count);
         } else if (op.type == OP_DEC)
         {
             count--;
-            printf("\tDecreasing count to %i\n", count);
         } else
         {
             (*i)--;
@@ -71,18 +68,15 @@ static void iterate_shift(dyn_array *optimized, dyn_array *operations, int *i)
 {
     int count = 0;
     size_t size = dyn_array_get_size(operations);
-    printf("Size: %llu\n", size);
     for (; (size_t)(*i) < size; (*i)++)
     {
         operation op = *(operation*)dyn_array_get(operations, *i);
         if (op.type == OP_LSHIFT)
         {
             count--;
-            printf("\tDecreasing count to %i\n", count);
         } else if (op.type == OP_RSHIFT)
         {
             count++;
-            printf("\tIncreasing count to %i\n", count);
         } else
         {
             (*i)--;
@@ -111,16 +105,12 @@ dyn_array *apply_o1_optimization(dyn_array *operations)
         operation op = *(operation*)dyn_array_get(operations, i);
         if (op.type == OP_DEC || op.type == OP_INC)
         {
-            printf("Calling 'iterate_arythmic'(%i):\n", i);
             iterate_arythmic(optimized, operations, &i);
         } else if (op.type == OP_LSHIFT || op.type == OP_RSHIFT)
         {
-            printf("Calling 'iterate_shift'(%i):\n", i);
             iterate_shift(optimized, operations, &i);
         }
     }
-
-    printf("Ended at %i\n", i);
 
     return optimized;
 }
