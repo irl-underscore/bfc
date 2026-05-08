@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include "file.h"
 #include "dyn_array.h"
 #include "lexer.h"
@@ -21,21 +22,22 @@ int main(int argc, char *argv[])
     dyn_array *operations = parse_file(buf);
     if (!operations)
     {
-        fprintf(stderr, "Error: failes to parse file.");
+        fprintf(stderr, "Error: failes to parse file");
         return 1;
     }
 
     dyn_array *optimized = apply_o1_optimization(operations);
     if (!optimized)
     {
-        fprintf(stderr, "Error: couldn't apply optimization.");
-        return 2;
+        fprintf(stderr, "Error: couldn't apply optimization");
+        return 1;
     }
 
     char *code = assemble(optimized);
     if (!code)
     {
-        fprintf(stderr, "Error: Could't assemble instructions.");
+        fprintf(stderr, "Error: Could't assemble instructions");
+        return 1;
     }
 
     pitch_template(code, "template.s", "out.s");
