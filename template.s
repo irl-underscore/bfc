@@ -1,5 +1,6 @@
 .section .bss
-    .lcomm data, $(tape_size)
+    .align 64
+    .lcomm data, 1024
 
 .section .text
 .global _start

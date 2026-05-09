@@ -19,12 +19,16 @@
 #define RSHIFT_OPERATION_FIRST "\taddq $"
 #define RSHIFT_OPERATION_SECOND ", %rbx\n"
 
+#define OUT_OPERATION "\tmovl $1, %eax\n\tmovq $1, %rdi\n\tmovq %rbx, %rsi\n\tmovq $1, %rdx\n\tsyscall\n"
+
 typedef enum op_type
 {
     OP_INC,
     OP_DEC,
     OP_RSHIFT,
-    OP_LSHIFT
+    OP_LSHIFT,
+    OP_OUT,
+    OP_IN
 } op_type;
 
 typedef struct operation

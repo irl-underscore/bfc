@@ -24,6 +24,8 @@ dyn_array *parse_file(file_buf *buf)
             case '-': op.type = OP_DEC; break;
             case '>': op.type = OP_RSHIFT; break;
             case '<': op.type = OP_LSHIFT; break;
+            case ',': op.type = OP_IN; break;
+            case '.': op.type = OP_OUT; break;
             default: valide = 0;
         }
 
@@ -43,13 +45,9 @@ static void iterate_arythmic(dyn_array *optimized, dyn_array *operations, int *i
     for (; (size_t)(*i) < size; (*i)++)
     {
         operation op = *(operation*)dyn_array_get(operations, *i);
-        if (op.type == OP_INC)
-        {
-            count++;
-        } else if (op.type == OP_DEC)
-        {
-            count--;
-        } else
+        if (op.type == OP_INC) count++;
+        else if (op.type == OP_DEC) count--;
+        else
         {
             (*i)--;
             break;
@@ -71,13 +69,9 @@ static void iterate_shift(dyn_array *optimized, dyn_array *operations, int *i)
     for (; (size_t)(*i) < size; (*i)++)
     {
         operation op = *(operation*)dyn_array_get(operations, *i);
-        if (op.type == OP_LSHIFT)
-        {
-            count--;
-        } else if (op.type == OP_RSHIFT)
-        {
-            count++;
-        } else
+        if (op.type == OP_LSHIFT) count--;
+        else if (op.type == OP_RSHIFT) count++;
+        else
         {
             (*i)--;
             break;
@@ -109,6 +103,9 @@ dyn_array *apply_o1_optimization(dyn_array *operations)
         } else if (op.type == OP_LSHIFT || op.type == OP_RSHIFT)
         {
             iterate_shift(optimized, operations, &i);
+        } else if (op.type == OP_OUT)
+        {
+            dyn_array_emplace_back(optimized, &op);
         }
     }
 
@@ -133,6 +130,8 @@ char *assemble(dyn_array *operations)
                 case OP_DEC: string_append_string(code, DEC_OPERATION); break;
                 case OP_LSHIFT: string_append_string(code, LSHIFT_OPERATION); break;
                 case OP_RSHIFT: string_append_string(code, RSHIFT_OPERATION); break;
+                case OP_OUT: string_append_string(code, OUT_OPERATION); break;
+                case OP_IN: break;
             }
         } else if (op.count != 0)
         {
@@ -140,31 +139,39 @@ char *assemble(dyn_array *operations)
              {
                  case OP_INC:
                  {
-                     char instruction[18];
+                     char instruction[20];
                      snprintf(instruction, sizeof(instruction), "%s%d%s", ADD_OPERATION_FIRST, op.count, ADD_OPERATION_SECOND);
                      string_append_string(code, instruction);
                      break;
                  }
                  case OP_DEC:
                  {
-                     char instruction[18];
+                     char instruction[20];
                      snprintf(instruction, sizeof(instruction), "%s%d%s", SUB_OPERATION_FIRST, op.count, SUB_OPERATION_SECOND);
                      string_append_string(code, instruction);
                      break;
                  }
                  case OP_LSHIFT:
                  {
-                     char instruction[16];
+                     char instruction[20];
                      snprintf(instruction, sizeof(instruction), "%s%d%s", LSHIFT_OPERATION_FIRST, op.count, LSHIFT_OPERATION_SECOND);
                      string_append_string(code, instruction);
                      break;
                  }
                  case OP_RSHIFT:
                  {
-                     char instruction[16];
+                     char instruction[20];
                      snprintf(instruction, sizeof(instruction), "%s%d%s", RSHIFT_OPERATION_FIRST, op.count, RSHIFT_OPERATION_SECOND);
                      string_append_string(code, instruction);
                      break;
+                 }
+                 case OP_IN:
+                 {
+                    // ...
+                 }
+                 case OP_OUT:
+                 {
+                     // ...
                  }
              }
         }
@@ -188,7 +195,7 @@ void pitch_template(char *assembled_code, char *template_file, char *output_file
 
     char line[1024];
     const char *tape_tag = "$(code)";
-    size_t tape_len = strlen(tape_tag);
+    size_t tape_len = strlen(tape_tag) + 1;
     while (fgets(line, sizeof(line), in))
     {
         if (line[0] == '#' || line[0] == '\n') continue;
