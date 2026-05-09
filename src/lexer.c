@@ -106,6 +106,9 @@ dyn_array *apply_o1_optimization(dyn_array *operations)
         } else if (op.type == OP_OUT)
         {
             dyn_array_emplace_back(optimized, &op);
+        } else if (op.type == OP_IN)
+        {
+            dyn_array_emplace_back(optimized, &op);
         }
     }
 
@@ -131,7 +134,7 @@ char *assemble(dyn_array *operations)
                 case OP_LSHIFT: string_append_string(code, LSHIFT_OPERATION); break;
                 case OP_RSHIFT: string_append_string(code, RSHIFT_OPERATION); break;
                 case OP_OUT: string_append_string(code, OUT_OPERATION); break;
-                case OP_IN: break;
+                case OP_IN: string_append_string(code, IN_OPERATION); break;
             }
         } else if (op.count != 0)
         {

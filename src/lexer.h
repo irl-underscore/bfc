@@ -19,7 +19,8 @@
 #define RSHIFT_OPERATION_FIRST "\taddq $"
 #define RSHIFT_OPERATION_SECOND ", %rbx\n"
 
-#define OUT_OPERATION "\tmovl $1, %eax\n\tmovq $1, %rdi\n\tmovq %rbx, %rsi\n\tmovq $1, %rdx\n\tsyscall\n"
+#define IN_OPERATION "\tmovq $0, %rax\n\tmovq $0, %rdi\n\tmovq %rbx, %rsi\n\tmovq $1, %rdi\n\tsyscall\n "
+#define OUT_OPERATION "\tmovq $1, %rax\n\tmovq $1, %rdi\n\tmovq %rbx, %rsi\n\tmovq $1, %rdx\n\tsyscall\n"
 
 typedef enum op_type
 {
