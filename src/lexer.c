@@ -31,7 +31,7 @@ dyn_array *parse_file(file_buf *buf)
 
         if (valide)
         {
-            dyn_array_emplace_back(operations, &op);
+            dyn_array_restrict_insert_end(operations, &op);
         }
     }
 
@@ -59,7 +59,7 @@ static void iterate_arythmic(dyn_array *optimized, dyn_array *operations, int *i
         .type = (count < 0) ? OP_DEC : OP_INC
     };
 
-    dyn_array_emplace_back(optimized, &res);
+    dyn_array_restrict_insert_end(optimized, &res);
 }
 
 static void iterate_shift(dyn_array *optimized, dyn_array *operations, int *i)
@@ -83,7 +83,7 @@ static void iterate_shift(dyn_array *optimized, dyn_array *operations, int *i)
         .type = (count < 0) ? OP_LSHIFT : OP_RSHIFT
     };
 
-    dyn_array_emplace_back(optimized, &res);
+    dyn_array_restrict_insert_end(optimized, &res);
 }
 
 dyn_array *apply_o1_optimization(dyn_array *operations)
@@ -105,10 +105,10 @@ dyn_array *apply_o1_optimization(dyn_array *operations)
             iterate_shift(optimized, operations, &i);
         } else if (op.type == OP_OUT)
         {
-            dyn_array_emplace_back(optimized, &op);
+            dyn_array_restrict_insert_end(optimized, &op);
         } else if (op.type == OP_IN)
         {
-            dyn_array_emplace_back(optimized, &op);
+            dyn_array_restrict_insert_end(optimized, &op);
         }
     }
 

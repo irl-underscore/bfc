@@ -26,7 +26,7 @@ dyn_array *dyn_array_create(size_t initial_size, size_t obj_size)
     return arr;
 }
 
-dyn_array *dyn_array_resize(dyn_array *arr)
+static dyn_array *dyn_array_resize(dyn_array *arr)
 {
     size_t new_capacity = arr->capacity * 2;
     size_t total_bytes = sizeof(dyn_array) + (new_capacity * arr->obj_size);
@@ -38,16 +38,40 @@ dyn_array *dyn_array_resize(dyn_array *arr)
     return temp;
 }
 
-void dyn_array_emplace_back(dyn_array *arr, void *obj)
+void dyn_array_insert_end(dyn_array *arr, void *obj)
 {
     if (!arr || !obj) return;
 
-    if (arr->index >= arr->capacity) arr = dyn_array_resize(arr);
+    if (arr->index >= arr->capacity)
+    {
+        uint8_t valide = 0;
+        size_t offset = 0;
+        if ((byte*)obj >= &arr->data[0] || (byte*)obj <= &arr->data[arr->capacity])
+        {
+            valide = 1;
+            offset = ((byte*)obj - &arr->data[0]) * arr->obj_size;
+        }
 
+        arr = dyn_array_resize(arr);
+        if (valide) obj = &arr->data[offset];
+    }
 
-    void *dest = (unsigned char*)arr->data + (arr->index * arr->obj_size);
+    void *dest = (byte*)arr->data + (arr->index * arr->obj_size);
+    memmove(dest, obj, arr->obj_size);
+    arr->index++;
+}
+
+void dyn_array_restrict_insert_end(dyn_array *__restrict__ arr, void *__restrict__ obj)
+{
+    if (!arr || !obj) return;
+
+    if (arr->index >= arr->capacity)
+    {
+        arr = dyn_array_resize(arr);
+    }
+
+    void *dest = (byte*)arr->data + (arr->index * arr->obj_size);
     memcpy(dest, obj, arr->obj_size);
-
     arr->index++;
 }
 
