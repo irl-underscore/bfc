@@ -10,7 +10,7 @@ typedef struct file_buf
     size_t size;
 } file_buf;
 
-file_buf *load_file_buf(char *path);
-void destroy_file_buf(file_buf *buf);
+file_buf *file_buf_load(char *path);
+void file_buf_destroy(file_buf *buf);
 
 #endif

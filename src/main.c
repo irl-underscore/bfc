@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "lexer.h"
 
@@ -10,7 +11,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    file_buf *buf = load_file_buf(argv[1]);
+    file_buf *buf = file_buf_load(argv[1]);
     if (!buf)
     {
         fprintf(stderr, "Error: Couldn't load file into buffer");
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
     if (!operations)
     {
         fprintf(stderr, "Error: failes to parse file");
+        file_buf_destroy(buf);
         return 1;
     }
 
@@ -28,6 +30,8 @@ int main(int argc, char *argv[])
     if (!optimized)
     {
         fprintf(stderr, "Error: couldn't apply optimization");
+        file_buf_destroy(buf);
+        dyn_array_destroy(operations);
         return 1;
     }
 
@@ -35,11 +39,16 @@ int main(int argc, char *argv[])
     if (!code)
     {
         fprintf(stderr, "Error: Could't assemble instructions");
+        file_buf_destroy(buf);
+        dyn_array_destroy(operations);
+        free(code);
         return 1;
     }
 
     pitch_template(code, "template.s", "out.s");
+    file_buf_destroy(buf);
     dyn_array_destroy(optimized);
     dyn_array_destroy(operations);
+    free(code);
     return 0;
 }

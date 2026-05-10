@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-file_buf *load_file_buf(char *path)
+file_buf *file_buf_load(char *path)
 {
     if (!path) return NULL;
 
@@ -29,7 +29,7 @@ file_buf *load_file_buf(char *path)
     return buf;
 }
 
-void destroy_file_buf(file_buf *buf)
+void file_buf_destroy(file_buf *buf)
 {
     if (!buf) return;
 
