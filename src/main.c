@@ -14,14 +14,15 @@ int main(int argc, char *argv[])
     file_buf *buf = file_buf_load(argv[1]);
     if (!buf)
     {
-        fprintf(stderr, "Error: Couldn't load file into buffer");
+        fprintf(stderr, "Error: Couldn't load file into buffer\n");
         return 1;
     }
 
+    printf("Buffer: %s", buf->data);
     dyn_array *operations = parse_file(buf);
     if (!operations)
     {
-        fprintf(stderr, "Error: failes to parse file");
+        fprintf(stderr, "Error: failes to parse file\n");
         file_buf_destroy(buf);
         return 1;
     }
@@ -29,7 +30,7 @@ int main(int argc, char *argv[])
     dyn_array *optimized = apply_o1_optimization(operations);
     if (!optimized)
     {
-        fprintf(stderr, "Error: couldn't apply optimization");
+        fprintf(stderr, "Error: couldn't apply optimization\n");
         file_buf_destroy(buf);
         dyn_array_destroy(operations);
         return 1;
@@ -38,7 +39,7 @@ int main(int argc, char *argv[])
     char *code = assemble(optimized);
     if (!code)
     {
-        fprintf(stderr, "Error: Could't assemble instructions");
+        fprintf(stderr, "Error: Could't assemble instructions\n");
         file_buf_destroy(buf);
         dyn_array_destroy(operations);
         free(code);
