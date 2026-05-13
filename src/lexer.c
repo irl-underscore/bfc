@@ -26,6 +26,8 @@ dyn_array *parse_file(file_buf *buf)
             case '<': op.type = OP_LSHIFT; break;
             case ',': op.type = OP_IN; break;
             case '.': op.type = OP_OUT; break;
+            case '[': op.type = OP_LLOOP; break;
+            case ']': op.type = OP_RLOOP; break;
             default: valide = 0;
         }
 
@@ -109,6 +111,12 @@ dyn_array *apply_o1_optimization(dyn_array *operations)
         } else if (op.type == OP_IN)
         {
             dyn_array_restrict_insert_end(optimized, &op);
+        } else if (op.type == OP_LLOOP)
+        {
+            dyn_array_restrict_insert_end(optimized, &op);
+        } else if (op.type == OP_RLOOP)
+        {
+            dyn_array_restrict_insert_end(optimized, &op);
         }
     }
 
@@ -119,6 +127,8 @@ char *assemble(dyn_array *operations)
 {
     if (!operations) return NULL;
 
+    uint16_t loops = 0;
+    uint8_t open = 0;
     string *code = string_create(100);
     if (!code) return NULL;
 
@@ -135,6 +145,22 @@ char *assemble(dyn_array *operations)
                 case OP_RSHIFT: string_append_string(code, RSHIFT_OPERATION); break;
                 case OP_OUT: string_append_string(code, OUT_OPERATION); break;
                 case OP_IN: string_append_string(code, IN_OPERATION); break;
+                case OP_LLOOP:
+                {
+                    char instruction[40];
+                    snprintf(instruction, sizeof(instruction), "%s%i%s", LOOP_OPERATION, ++loops, LLOOP_OPERATION);
+                    string_append_string(code, instruction);
+                    open++;
+                    break;
+                }
+                case OP_RLOOP:
+                {
+                    char instruction[50];
+                    snprintf(instruction, sizeof(instruction), "%s%i%s%i%s", RLOOP_OPERATION_FIRST, loops, RLOOP_OPERATION_SECOND, loops, RLOOP_OPERATON_THIRD);
+                    string_append_string(code, instruction);
+                    open--;
+                    break;
+                }
             }
         } else if (op.count != 0)
         {
@@ -168,16 +194,18 @@ char *assemble(dyn_array *operations)
                      string_append_string(code, instruction);
                      break;
                  }
-                 case OP_IN:
-                 {
-                    // ...
-                 }
-                 case OP_OUT:
-                 {
-                     // ...
-                 }
+                 case OP_IN: break;
+                 case OP_OUT: break;
+                 case OP_LLOOP: break;
+                 case OP_RLOOP: break;
              }
         }
+    }
+
+    if (open > 0)
+    {
+        printf("Error: Expected %i ']' at the end\n", open);
+        return NULL;
     }
 
     return string_get_raw(code);
