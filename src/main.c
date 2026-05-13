@@ -50,6 +50,22 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    printf("Operations(optimzed): ");
+    for (int i = 0; i < dyn_array_get_size(optimized); i++)
+    {
+        operation op = *(operation*)dyn_array_get(optimized, i);
+        switch (op.type)
+        {
+            case OP_INC: printf("'+'(%i) ", op.count); break;
+            case OP_DEC: printf("'-'(%i) ", op.count); break;
+            case OP_LSHIFT: printf("'<'(%i) ", op.count); break;
+            case OP_RSHIFT: printf("'>'(%i) ", op.count); break;
+            case OP_OUT: printf("'.'(%i) ", op.count); break;
+            case OP_IN: printf("','(%i) ", op.count); break;
+        }
+    }
+
+    printf("\n");
     char *code = assemble(optimized);
     if (!code)
     {
@@ -60,6 +76,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    printf("Code: \n%s", code);
     pitch_template(code, "template.s", "out.s");
     file_buf_destroy(buf);
     dyn_array_destroy(optimized);

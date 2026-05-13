@@ -41,6 +41,6 @@ typedef struct operation
 dyn_array *parse_file(file_buf *buf);
 dyn_array *apply_o1_optimization(dyn_array *operations);
 char *assemble(dyn_array *operations);
-void pitch_template(char *assembled_code, char *template_file, char *output_file);
+void pitch_template(const char *assembled_code, const char *template_file, const char *output_file);
 
 #endif /* LEXER_H */

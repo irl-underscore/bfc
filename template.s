@@ -11,4 +11,4 @@ $(code)
     xorq %rdi, %rdi
     syscall
 
-# Funfact: If you compile thís code with the GAS assembler and remove the brainfuck compilers $() calls this programme is ~5KB in size :)
+# Funfact: If you compile thís code with the GAS assembler and remove the brainfuck compilers $() replacables this programme is ~5KB in size :)

@@ -183,16 +183,20 @@ char *assemble(dyn_array *operations)
     return string_get_raw(code);
 }
 
-void pitch_template(char *assembled_code, char *template_file, char *output_file)
+void pitch_template(const char *assembled_code, const char *template_file, const char *output_file)
 {
     if (!assembled_code || !template_file || !output_file) return;
 
     FILE *in = fopen(template_file, "r");
+    if (!in) {
+        perror("Error opening input");
+        return;
+    }
+
     FILE *out = fopen(output_file, "w");
-    if (!in || !out) {
-        if (in) fclose(in);
-        if (out) fclose(out);
-        printf("Couldn't open some file!");
+    if (!out) {
+        perror("Error opening output");
+        fclose(in);
         return;
     }
 
@@ -201,7 +205,7 @@ void pitch_template(char *assembled_code, char *template_file, char *output_file
     size_t tape_len = strlen(tape_tag) + 1;
     while (fgets(line, sizeof(line), in))
     {
-        if (line[0] == '#' || line[0] == '\n') continue;
+        if (line[0] == '#') continue;
 
         char *tag_pos = strstr(line, tape_tag);
         if (tag_pos)
