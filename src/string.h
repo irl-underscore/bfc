@@ -19,7 +19,6 @@ string *string_create(size_t initial_size);
 string *string_copy(const char *data);
 void string_append_string(string *str, const char *data);
 void string_append_format(string *str, const char *format, ...);
-void stirng_append_char(string *str, char c);
 char *string_get_raw(string *str);
 void string_destroy(string *str);
 
