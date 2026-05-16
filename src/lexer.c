@@ -143,7 +143,7 @@ char *assemble(dyn_array *operations, ArcType type)
             case OP_LLOOP: emit_loop_start(type, code, &loops); break;
             case OP_RLOOP: emit_loop_end(type, code, &loops); break;
             case OP_IN: emit_syscall(type, code, BF_CALL_READ, "$0", "%rbx", "$1"); break;
-            case OP_OUT: emit_syscall(type, code, BF_CALL_WRITE, "$0", "%rbx", "$1"); break;
+            case OP_OUT: emit_syscall(type, code, BF_CALL_WRITE, "$1", "%rbx", "$1"); break;
         }
     }
 
