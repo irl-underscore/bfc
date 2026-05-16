@@ -1,7 +1,7 @@
 #include "lexer.h"
 
 #include "string.h"
-#include "syscall.h"
+#include "assembler.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -129,84 +129,23 @@ char *assemble(dyn_array *operations)
     if (!operations) return NULL;
 
     uint16_t loops = 0;
-    uint8_t open = 0;
     string *code = string_create(100);
     if (!code) return NULL;
 
     for (int i = 0; (size_t)i < dyn_array_get_size(operations); ++i)
     {
         operation op = *(operation*)dyn_array_get(operations, i);
-        if (op.count == 1)
+        switch (op.type)
         {
-            switch (op.type)
-            {
-                case OP_INC: string_append_string(code, INC_OPERATION); break;
-                case OP_DEC: string_append_string(code, DEC_OPERATION); break;
-                case OP_LSHIFT: string_append_string(code, LSHIFT_OPERATION); break;
-                case OP_RSHIFT: string_append_string(code, RSHIFT_OPERATION); break;
-                case OP_OUT: emit_syscall(ARC_X86_64_LINUX, code, BF_CALL_WRITE, "$1", "%rbx", "$1"); break;
-                case OP_IN: emit_syscall(ARC_X86_64_LINUX, code, BF_CALL_READ, "$0", "%rbx", "$1"); break;
-                case OP_LLOOP:
-                {
-                    char instruction[40];
-                    snprintf(instruction, sizeof(instruction), "%s%i%s", LOOP_OPERATION, ++loops, LLOOP_OPERATION);
-                    string_append_string(code, instruction);
-                    open++;
-                    break;
-                }
-                case OP_RLOOP:
-                {
-                    char instruction[50];
-                    snprintf(instruction, sizeof(instruction), "%s%i%s%i%s", RLOOP_OPERATION_FIRST, loops, RLOOP_OPERATION_SECOND, loops, RLOOP_OPERATON_THIRD);
-                    string_append_string(code, instruction);
-                    open--;
-                    break;
-                }
-            }
-        } else if (op.count != 0)
-        {
-             switch (op.type)
-             {
-                 case OP_INC:
-                 {
-                     char instruction[20];
-                     snprintf(instruction, sizeof(instruction), "%s%d%s", ADD_OPERATION_FIRST, op.count, ADD_OPERATION_SECOND);
-                     string_append_string(code, instruction);
-                     break;
-                 }
-                 case OP_DEC:
-                 {
-                     char instruction[20];
-                     snprintf(instruction, sizeof(instruction), "%s%d%s", SUB_OPERATION_FIRST, op.count, SUB_OPERATION_SECOND);
-                     string_append_string(code, instruction);
-                     break;
-                 }
-                 case OP_LSHIFT:
-                 {
-                     char instruction[20];
-                     snprintf(instruction, sizeof(instruction), "%s%d%s", LSHIFT_OPERATION_FIRST, op.count, LSHIFT_OPERATION_SECOND);
-                     string_append_string(code, instruction);
-                     break;
-                 }
-                 case OP_RSHIFT:
-                 {
-                     char instruction[20];
-                     snprintf(instruction, sizeof(instruction), "%s%d%s", RSHIFT_OPERATION_FIRST, op.count, RSHIFT_OPERATION_SECOND);
-                     string_append_string(code, instruction);
-                     break;
-                 }
-                 case OP_IN: break;
-                 case OP_OUT: break;
-                 case OP_LLOOP: break;
-                 case OP_RLOOP: break;
-             }
+            case OP_INC: emit_inc_op(ARC_X86_64_LINUX, code, op.count); break;
+            case OP_DEC: emit_dec_op(ARC_X86_64_LINUX, code, op.count); break;
+            case OP_LSHIFT: emit_lshift_op(ARC_X86_64_LINUX, code, op.count); break;
+            case OP_RSHIFT: emit_rshift_op(ARC_X86_64_LINUX, code, op.count); break;
+            case OP_LLOOP: emit_loop_start(ARC_X86_64_LINUX, code, &loops); break;
+            case OP_RLOOP: emit_loop_end(ARC_X86_64_LINUX, code, &loops); break;
+            case OP_IN: emit_syscall(ARC_X86_64_LINUX, code, BF_CALL_READ, "$0", "%rbx", "$1"); break;
+            case OP_OUT: emit_syscall(ARC_X86_64_LINUX, code, BF_CALL_WRITE, "$0", "%rbx", "$1"); break;
         }
-    }
-
-    if (open > 0)
-    {
-        printf("Error: Expected %i ']' at the end\n", open);
-        return NULL;
     }
 
     return string_get_raw(code);
