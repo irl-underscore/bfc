@@ -1,6 +1,6 @@
 #ifndef LEXER_H
 #define LEXER_H
-#include "file.h"
+#include "buffer.h"
 #include "dyn_array.h"
 
 #include <stdint.h>

@@ -1,7 +1,9 @@
 #include "string.h"
 
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
+#include <stdio.h>
 
 struct string {
     size_t length;
@@ -58,13 +60,30 @@ void string_append_string(string *str, const char *data)
     if (!str || !str->data || !data) return;
 
     size_t data_len = strlen(data);
-    if (str->length + data_len > str->capacity)
-    {
-        string_realloc(str, str->length + data_len);
-    }
+    size_t target_len = str->length + data_len;
+    if (target_len > str->capacity) string_realloc(str, target_len);
 
     memcpy(str->data + str->length, data, data_len);
-    str->length += data_len;
+    str->length = target_len;
+    str->data[str->length] = '\0';
+}
+
+void string_append_format(string *str, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    size_t len = vsnprintf(NULL, 0, format, args);
+    va_end(args);
+    if (len < 0) return;
+
+    size_t target_len = str->length + len;
+    if (target_len > str->capacity) string_realloc(str, target_len);
+
+    va_start(args, format);
+    vsnprintf(str->data + str->length, len + 1, format, args);
+    va_end(args);
+
+    str->length = target_len;
     str->data[str->length] = '\0';
 }
 

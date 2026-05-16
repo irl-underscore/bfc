@@ -6,6 +6,9 @@
 *.txt
 
 build/
+.cache/
+
+compile_commands.json
 
 # temporary
 main.bf

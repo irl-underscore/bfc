@@ -1,6 +1,7 @@
 #include "lexer.h"
 
 #include "string.h"
+#include "syscall.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -143,8 +144,8 @@ char *assemble(dyn_array *operations)
                 case OP_DEC: string_append_string(code, DEC_OPERATION); break;
                 case OP_LSHIFT: string_append_string(code, LSHIFT_OPERATION); break;
                 case OP_RSHIFT: string_append_string(code, RSHIFT_OPERATION); break;
-                case OP_OUT: string_append_string(code, OUT_OPERATION); break;
-                case OP_IN: string_append_string(code, IN_OPERATION); break;
+                case OP_OUT: emit_syscall(ARC_X86_64_LINUX, code, BF_CALL_WRITE, "$1", "%rbx", "$1"); break;
+                case OP_IN: emit_syscall(ARC_X86_64_LINUX, code, BF_CALL_READ, "$0", "%rbx", "$1"); break;
                 case OP_LLOOP:
                 {
                     char instruction[40];
