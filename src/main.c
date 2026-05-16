@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    char *code = assemble(optimized);
+    char *code = assemble(optimized, ARC_X86_64_LINUX);
     if (!code)
     {
         fprintf(stderr, "Error: Could't assemble instructions\n");

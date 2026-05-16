@@ -1,7 +1,6 @@
 #include "lexer.h"
 
 #include "string.h"
-#include "assembler.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -124,7 +123,7 @@ dyn_array *apply_o1_optimization(dyn_array *operations)
     return optimized;
 }
 
-char *assemble(dyn_array *operations)
+char *assemble(dyn_array *operations, ArcType type)
 {
     if (!operations) return NULL;
 
@@ -137,14 +136,14 @@ char *assemble(dyn_array *operations)
         operation op = *(operation*)dyn_array_get(operations, i);
         switch (op.type)
         {
-            case OP_INC: emit_inc_op(ARC_X86_64_LINUX, code, op.count); break;
-            case OP_DEC: emit_dec_op(ARC_X86_64_LINUX, code, op.count); break;
-            case OP_LSHIFT: emit_lshift_op(ARC_X86_64_LINUX, code, op.count); break;
-            case OP_RSHIFT: emit_rshift_op(ARC_X86_64_LINUX, code, op.count); break;
-            case OP_LLOOP: emit_loop_start(ARC_X86_64_LINUX, code, &loops); break;
-            case OP_RLOOP: emit_loop_end(ARC_X86_64_LINUX, code, &loops); break;
-            case OP_IN: emit_syscall(ARC_X86_64_LINUX, code, BF_CALL_READ, "$0", "%rbx", "$1"); break;
-            case OP_OUT: emit_syscall(ARC_X86_64_LINUX, code, BF_CALL_WRITE, "$0", "%rbx", "$1"); break;
+            case OP_INC: emit_inc_op(type, code, op.count); break;
+            case OP_DEC: emit_dec_op(type, code, op.count); break;
+            case OP_LSHIFT: emit_lshift_op(type, code, op.count); break;
+            case OP_RSHIFT: emit_rshift_op(type, code, op.count); break;
+            case OP_LLOOP: emit_loop_start(type, code, &loops); break;
+            case OP_RLOOP: emit_loop_end(type, code, &loops); break;
+            case OP_IN: emit_syscall(type, code, BF_CALL_READ, "$0", "%rbx", "$1"); break;
+            case OP_OUT: emit_syscall(type, code, BF_CALL_WRITE, "$0", "%rbx", "$1"); break;
         }
     }
 
