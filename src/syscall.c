@@ -1,5 +1,7 @@
 #include "syscall.h"
 
+#include <stdint.h>
+
 #include "syscall/x86_linux.h"
 #include "syscall/x86_64_linux.h"
 

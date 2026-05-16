@@ -9,7 +9,7 @@
 
 #define X(bf_code, matches) [bf_code] matches + 1,
 
-static int x86_64_linux_syscall_table[] = {
+static int64_t x86_64_linux_syscall_table[] = {
     #include "syscall_map.h"
 };
 
