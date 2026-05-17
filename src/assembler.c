@@ -42,7 +42,7 @@ void emit_lshift_op(ArcType type, string *dst, uint16_t count)
     {
         case ARC_X86_64_LINUX: {
             if (count == 0) string_append_string(dst, "\tdecq %rbx\n");
-            else if (count > 0) string_append_format(dst, "\tdecq $%d, %%rbx\n", count);
+            else if (count > 0) string_append_format(dst, "\tsubq $%d, %%rbx\n", count);
 
             break;
         }

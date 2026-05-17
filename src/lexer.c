@@ -56,12 +56,15 @@ static void iterate_arythmic(dyn_array *optimized, dyn_array *operations, int *i
         }
     }
 
-    operation res = {
-        .count = abs(count),
-        .type = (count < 0) ? OP_DEC : OP_INC
-    };
+    if (count != 0)
+    {
+        operation res = {
+            .count = abs(count),
+            .type = (count < 0) ? OP_DEC : OP_INC
+        };
 
-    dyn_array_restrict_insert_end(optimized, &res);
+        dyn_array_restrict_insert_end(optimized, &res);
+    }
 }
 
 static void iterate_shift(dyn_array *optimized, dyn_array *operations, int *i)
@@ -80,12 +83,15 @@ static void iterate_shift(dyn_array *optimized, dyn_array *operations, int *i)
         }
     }
 
-    operation res = {
-        .count = abs(count),
-        .type = (count < 0) ? OP_LSHIFT : OP_RSHIFT
-    };
+    if (count != 0)
+    {
+        operation res = {
+            .count = abs(count),
+            .type = (count < 0) ? OP_LSHIFT : OP_RSHIFT
+        };
 
-    dyn_array_restrict_insert_end(optimized, &res);
+        dyn_array_restrict_insert_end(optimized, &res);
+    }
 }
 
 dyn_array *apply_o1_optimization(dyn_array *operations)
