@@ -26,16 +26,17 @@ dyn_array *dyn_array_create(size_t initial_size, size_t obj_size)
     return arr;
 }
 
-static dyn_array *dyn_array_resize(dyn_array *arr)
+static void dyn_array_resize(dyn_array **arr)
 {
-    size_t new_capacity = arr->capacity * 2;
-    size_t total_bytes = sizeof(dyn_array) + (new_capacity * arr->obj_size);
+    size_t new_capacity = (*arr)->capacity * 2;
 
-    dyn_array *temp = realloc(arr, total_bytes);
-    if (!temp) return arr;
+    size_t total_bytes = sizeof(dyn_array) + (new_capacity * (*arr)->obj_size);
+
+    dyn_array *temp = realloc(*arr, total_bytes);
+    if (!temp) return;
 
     temp->capacity = new_capacity;
-    return temp;
+    (*arr) = temp;
 }
 
 void dyn_array_insert_end(dyn_array *arr, void *obj)
@@ -52,7 +53,7 @@ void dyn_array_insert_end(dyn_array *arr, void *obj)
             offset = ((byte*)obj - &arr->data[0]) * arr->obj_size;
         }
 
-        arr = dyn_array_resize(arr);
+        dyn_array_resize(&arr);
         if (valide) obj = &arr->data[offset];
     }
 
@@ -67,7 +68,9 @@ void dyn_array_restrict_insert_end(dyn_array *__restrict__ arr, void *__restrict
 
     if (arr->index >= arr->capacity)
     {
-        arr = dyn_array_resize(arr);
+        dyn_array *new_arr = arr;
+        dyn_array_resize(&new_arr);
+        arr = new_arr;
     }
 
     void *dest = (byte*)arr->data + (arr->index * arr->obj_size);

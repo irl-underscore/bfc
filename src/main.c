@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "lexer.h"
+#include "assembler.h"
 
 int main(int argc, char *argv[])
 {

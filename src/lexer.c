@@ -129,33 +129,6 @@ dyn_array *apply_o1_optimization(dyn_array *operations)
     return optimized;
 }
 
-char *assemble(dyn_array *operations, ArcType type)
-{
-    if (!operations) return NULL;
-
-    uint16_t loops = 0;
-    string *code = string_create(100);
-    if (!code) return NULL;
-
-    for (int i = 0; (size_t)i < dyn_array_get_size(operations); ++i)
-    {
-        operation op = *(operation*)dyn_array_get(operations, i);
-        switch (op.type)
-        {
-            case OP_INC: emit_inc_op(type, code, op.count); break;
-            case OP_DEC: emit_dec_op(type, code, op.count); break;
-            case OP_LSHIFT: emit_lshift_op(type, code, op.count); break;
-            case OP_RSHIFT: emit_rshift_op(type, code, op.count); break;
-            case OP_LLOOP: emit_loop_start(type, code, &loops); break;
-            case OP_RLOOP: emit_loop_end(type, code, &loops); break;
-            case OP_IN: emit_syscall(type, code, BF_CALL_READ, "$0", "%rbx", "$1"); break;
-            case OP_OUT: emit_syscall(type, code, BF_CALL_WRITE, "$1", "%rbx", "$1"); break;
-        }
-    }
-
-    return string_get_raw(code);
-}
-
 void pitch_template(const char *assembled_code, const char *template_file, const char *output_file)
 {
     if (!assembled_code || !template_file || !output_file) return;

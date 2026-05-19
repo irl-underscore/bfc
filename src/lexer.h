@@ -2,7 +2,6 @@
 #define LEXER_H
 #include "buffer.h"
 #include "dyn_array.h"
-#include "assembler.h"
 
 #include <stdint.h>
 
@@ -26,7 +25,6 @@ typedef struct operation
 
 dyn_array *parse_file(file_buf *buf);
 dyn_array *apply_o1_optimization(dyn_array *operations);
-char *assemble(dyn_array *operations, ArcType target);
 void pitch_template(const char *assembled_code, const char *template_file, const char *output_file);
 
 #endif /* LEXER_H */
