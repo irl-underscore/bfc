@@ -14,6 +14,8 @@ dyn_array *parse_file(file_buf *buf)
     if (!operations) return NULL;
 
     char *root = buf->data;
+    int dbg_count = 0;
+    int dbg_obj_count = 0;
     for (char curr = *root; curr != '\0'; curr = *++root)
     {
         uint8_t valide = 1;
@@ -34,7 +36,12 @@ dyn_array *parse_file(file_buf *buf)
         if (valide)
         {
             dyn_array_restrict_insert_end(operations, &op);
+            printf("Inserting at: %i(%i | %c)\n", dbg_count, dbg_obj_count, curr);
+            dbg_obj_count++;
         }
+
+        printf("Iteration: %i\n", dbg_count);
+        dbg_count++;
     }
 
     return operations;

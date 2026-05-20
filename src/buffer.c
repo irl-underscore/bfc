@@ -15,6 +15,7 @@ file_buf *file_buf_load(char *path)
 
     fseek(file, 0, SEEK_END);
     buf->size = ftell(file);
+    printf("Buffer size: %llu\n", buf->size);
     fseek(file, 0, SEEK_SET);
     buf->data = malloc(buf->size + 1);
     if (!buf->data)

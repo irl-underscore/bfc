@@ -26,6 +26,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    printf("Size: %llu\n", dyn_array_get_size(operations));
+
     dyn_array *optimized = apply_o1_optimization(operations);
     if (!optimized)
     {

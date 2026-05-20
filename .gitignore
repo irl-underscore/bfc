@@ -5,7 +5,8 @@
 
 *.txt
 
-build/
+debug/
+release/
 .cache/
 
 compile_commands.json
