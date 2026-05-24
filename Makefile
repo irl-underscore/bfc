@@ -30,14 +30,14 @@ PROJECT := brainfuck
 DEBUG := $(DEBUG_DIR)/$(PROJECT)
 RELEASE := $(RELEASE_DIR)/$(PROJECT)
 
-.PHONY: all clean release run
+.PHONY: all clean rel run
 
 all: $(DEBUG)
 
 $(DEBUG): $(DEBUG_OBJS) | $(DEBUG_DIR)
 	$(CC) $(CFLAGS) $(DBFLAGS) $^ -o $@
 
-release: $(RELEASE_OBJS) | $(RELEASE_DIR)
+rel: $(RELEASE_OBJS) | $(RELEASE_DIR)
 	$(CC) $(CFLAGS) $(RELFLAGS) $^ -o $(RELEASE)
 
 $(DEBUG_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(DEBUG_OBJ_DIR)
