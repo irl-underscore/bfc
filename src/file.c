@@ -29,8 +29,6 @@ file_buf *file_buf_load(const char *path)
     }
 
     buf->size = (size_t)length;
-    printf("Buffer size: %zu\n", buf->size);
-
     buf->data = malloc(buf->size + 1);
     if (!buf->data) {
         fclose(file);
@@ -59,8 +57,6 @@ dyn_array *parse_file(file_buf *buf)
 
     dyn_array *operations = dyn_array_create(50, sizeof(operation));
     char *root = buf->data;
-    int dbg_count = 0;
-    int dbg_obj_count = 0;
     char *end = buf->data + buf->size;
     for (char curr = *root; curr != '\0' && root <= end; ++root)
     {
@@ -83,12 +79,7 @@ dyn_array *parse_file(file_buf *buf)
         if (valide)
         {
             dyn_array_restrict_insert_end(operations, &op);
-            printf("Inserting at: %i(%i | %c)\n", dbg_count, dbg_obj_count, curr);
-            dbg_obj_count++;
         }
-
-        printf("Iteration: %i\n", dbg_count);
-        dbg_count++;
     }
 
     return operations;

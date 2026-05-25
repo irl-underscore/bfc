@@ -29,20 +29,17 @@ dyn_array *dyn_array_create(size_t initial_size, size_t obj_size)
 
 static void dyn_array_resize(dyn_array **arr)
 {
-    printf("Entering Temporary alloc\n");
     size_t new_capacity = (*arr)->capacity * 2;
 
     size_t total_bytes = sizeof(dyn_array) + (new_capacity * (*arr)->obj_size);
 
     dyn_array *temp = realloc(*arr, total_bytes);
     if (!temp) {
-        printf("Exiting temporary alloc\n");
         return;
     }
 
     temp->capacity = new_capacity;
     (*arr) = temp;
-    printf("Temporary alloc suc(inc to %llu)\n", temp->capacity);
 }
 
 void dyn_array_insert_end(dyn_array *arr, void *obj)
