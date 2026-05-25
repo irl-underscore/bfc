@@ -2,6 +2,8 @@
 #define TYPE_H
 #include <stdint.h>
 
+typedef unsigned char byte;
+
 typedef enum ir_type
 {
     OP_INC,

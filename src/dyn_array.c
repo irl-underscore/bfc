@@ -1,6 +1,6 @@
 #include "dyn_array.h"
 
-#include "math.h"
+#include "type.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -30,9 +30,7 @@ dyn_array *dyn_array_create(size_t initial_size, size_t obj_size)
 static void dyn_array_resize(dyn_array **arr)
 {
     size_t new_capacity = (*arr)->capacity * 2;
-
     size_t total_bytes = sizeof(dyn_array) + (new_capacity * (*arr)->obj_size);
-
     dyn_array *temp = realloc(*arr, total_bytes);
     if (!temp) {
         return;
