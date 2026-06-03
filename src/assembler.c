@@ -123,7 +123,7 @@ static void process_intructions(ArcType type, string *dst, dyn_array *operations
 {
     if (!dst) return;
 
-    uint16_t loops;
+    uint16_t loops = 0;
     stack *loop_stack = stack_create();
     size_t arr_size = dyn_array_get_size(operations);
     for (size_t i = 0; i < arr_size; i++)
