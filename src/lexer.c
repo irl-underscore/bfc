@@ -27,15 +27,17 @@ static void iterate_arythmic(dyn_array *operations, char **root, char *end)
         {
             count++;
             (*root)++;
-        }
-        else if (curr == '-')
+        } else if (curr == '-')
         {
             count--;
             (*root)++;
-        }
-        else if (curr == '\n') (*root)++;
+        } else if (curr == '\n') (*root)++;
         else if (check_loop_start(root) == IR_CLEAR) count = 0;
-        else break;
+        else
+        {
+            (*root)--;
+            break;
+        }
     }
 
     if (count != 0)
@@ -52,10 +54,18 @@ static void iterate_arythmic(dyn_array *operations, char **root, char *end)
 static void iterate_shift(dyn_array *operations, char **root, char *end)
 {
     int64_t count = 0;
-    for (char curr = **root; **root != '\0' && *root <= end; root++)
-    {
-        if (curr == '<') count--;
-        else if (curr == '>') count++;
+    while (*root < end) {
+        char curr = **root;
+        if (curr == '<')
+        {
+            count--;
+            (*root)++;
+        }
+        else if (curr == '>')
+        {
+            count++;
+            (*root)++;
+        } else if (curr == '\n') (*root)++;
         else
         {
             (*root)--;
