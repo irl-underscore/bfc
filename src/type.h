@@ -6,21 +6,22 @@ typedef unsigned char byte;
 
 typedef enum ir_type
 {
-    OP_INC,
-    OP_DEC,
-    OP_RSHIFT,
-    OP_LSHIFT,
-    OP_OUT,
-    OP_IN,
-    OP_LLOOP,
-    OP_RLOOP
+    IR_INC,
+    IR_DEC,
+    IR_CLEAR,
+    IR_RSHIFT,
+    IR_LSHIFT,
+    IR_OUT,
+    IR_IN,
+    IR_LLOOP,
+    IR_RLOOP
 } ir_type;
 
-typedef struct operation
+typedef struct ir_operation
 {
     ir_type type;
     uint16_t count;
-} operation;
+} ir_operation;
 
 typedef enum
 {

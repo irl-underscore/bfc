@@ -4,94 +4,125 @@
 #include "type.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
-static void iterate_arythmic(dyn_array *optimized, dyn_array *operations, int *i)
+static ir_type check_loop_start(char **root)
 {
-    int count = 0;
-    size_t size = dyn_array_get_size(operations);
-    for (; (size_t)(*i) < size; (*i)++)
+    if (strncmp(*root, "[-]", 3) == 0)
     {
-        operation op = *(operation*)dyn_array_get(operations, *i);
-        if (op.type == OP_INC) count++;
-        else if (op.type == OP_DEC) count--;
+        (*root) += 3;
+        return IR_CLEAR;
+    }
+
+    return IR_LLOOP;
+}
+
+static void iterate_arythmic(dyn_array *operations, char **root, char *end)
+{
+    int64_t count = 0;
+    while (*root < end)
+    {
+        char curr = **root;
+        if (curr == '+')
+        {
+            count++;
+            (*root)++;
+        }
+        else if (curr == '-')
+        {
+            count--;
+            (*root)++;
+        }
+        else if (curr == '\n') (*root)++;
+        else if (check_loop_start(root) == IR_CLEAR) count = 0;
+        else break;
+    }
+
+    if (count != 0)
+    {
+        ir_operation res = {
+            .count = _abs64(count),
+            .type = (count < 0) ? IR_DEC : IR_INC
+        };
+
+        dyn_array_restrict_insert_end(operations, &res);
+    }
+}
+
+static void iterate_shift(dyn_array *operations, char **root, char *end)
+{
+    int64_t count = 0;
+    for (char curr = **root; **root != '\0' && *root <= end; root++)
+    {
+        if (curr == '<') count--;
+        else if (curr == '>') count++;
         else
         {
-            (*i)--;
+            (*root)--;
             break;
         }
     }
 
     if (count != 0)
     {
-        operation res = {
-            .count = abs(count),
-            .type = (count < 0) ? OP_DEC : OP_INC
+        ir_operation res = {
+            .count = _abs64(count),
+            .type = (count < 0) ? IR_LSHIFT : IR_RSHIFT
         };
 
-        dyn_array_restrict_insert_end(optimized, &res);
+        dyn_array_restrict_insert_end(operations, &res);
     }
 }
 
-static void iterate_shift(dyn_array *optimized, dyn_array *operations, int *i)
+static ir_operation translate_sign(char sign)
 {
-    int count = 0;
-    size_t size = dyn_array_get_size(operations);
-    for (; (size_t)(*i) < size; (*i)++)
+    ir_operation res = {
+        .count = 1
+    };
+
+    switch (sign)
     {
-        operation op = *(operation*)dyn_array_get(operations, *i);
-        if (op.type == OP_LSHIFT) count--;
-        else if (op.type == OP_RSHIFT) count++;
-        else
-        {
-            (*i)--;
-            break;
-        }
+        case ',': res.type = IR_IN; break;
+        case '.': res.type = IR_OUT; break;
+        case '[': res.type = IR_LLOOP; break;
+        case ']': res.type = IR_RLOOP; break;
     }
 
-    if (count != 0)
-    {
-        operation res = {
-            .count = abs(count),
-            .type = (count < 0) ? OP_LSHIFT : OP_RSHIFT
-        };
-
-        dyn_array_restrict_insert_end(optimized, &res);
-    }
+    return res;
 }
 
-dyn_array *apply_o1_optimization(dyn_array *operations)
+static void insert_loop_start(dyn_array *operations, char **root)
 {
-    if (!operations) return NULL;
+    ir_operation op = {
+        .type = check_loop_start(root),
+        .count = 1
+    };
 
-    dyn_array *optimized = dyn_array_create(dyn_array_get_size(operations), sizeof(operation));
-    if (!optimized) return NULL;
+    dyn_array_restrict_insert_end(operations, &op);
+}
 
-    int i = 0;
-    for (; (size_t)i < dyn_array_get_size(operations); i++)
+dyn_array *parse_file(file_buf *buf)
+{
+    if (!buf) return NULL;
+
+    dyn_array *operations = dyn_array_create(100, sizeof(ir_operation));
+    char *root = buf->data;
+    char *end = buf->data + buf->size;
+    for (char curr = *root; curr != '\0' && root <= end; ++root)
     {
-        operation op = *(operation*)dyn_array_get(operations, i);
-        if (op.type == OP_DEC || op.type == OP_INC)
-        {
-            iterate_arythmic(optimized, operations, &i);
-        } else if (op.type == OP_LSHIFT || op.type == OP_RSHIFT)
-        {
-            iterate_shift(optimized, operations, &i);
-        } else if (op.type == OP_OUT)
-        {
-            dyn_array_restrict_insert_end(optimized, &op);
-        } else if (op.type == OP_IN)
-        {
-            dyn_array_restrict_insert_end(optimized, &op);
-        } else if (op.type == OP_LLOOP)
-        {
-            dyn_array_restrict_insert_end(optimized, &op);
-        } else if (op.type == OP_RLOOP)
-        {
-            dyn_array_restrict_insert_end(optimized, &op);
+        curr = *root;
+        ir_operation sign = translate_sign(curr);
+        switch (curr) {
+            case '+':
+            case '-': iterate_arythmic(operations, &root, end); break;
+            case '>':
+            case '<': iterate_shift(operations, &root, end); break;
+            case ',': dyn_array_restrict_insert_end(operations, &sign); break;
+            case '.': dyn_array_restrict_insert_end(operations, &sign); break;
+            case '[': insert_loop_start(operations, &root); break;
+            case ']': dyn_array_restrict_insert_end(operations, &sign); break;
         }
     }
 
-    return optimized;
+    return operations;
 }

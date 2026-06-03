@@ -51,40 +51,6 @@ void file_buf_destroy(file_buf *buf)
     free(buf);
 }
 
-dyn_array *parse_file(file_buf *buf)
-{
-    if (!buf) return NULL;
-
-    dyn_array *operations = dyn_array_create(50, sizeof(operation));
-    char *root = buf->data;
-    char *end = buf->data + buf->size;
-    for (char curr = *root; curr != '\0' && root <= end; ++root)
-    {
-        curr = *root;
-        uint8_t valide = 1;
-        operation op;
-        op.count = 1;
-        switch (curr) {
-            case '+': op.type = OP_INC; break;
-            case '-': op.type = OP_DEC; break;
-            case '>': op.type = OP_RSHIFT; break;
-            case '<': op.type = OP_LSHIFT; break;
-            case ',': op.type = OP_IN; break;
-            case '.': op.type = OP_OUT; break;
-            case '[': op.type = OP_LLOOP; break;
-            case ']': op.type = OP_RLOOP; break;
-            default: valide = 0;
-        }
-
-        if (valide)
-        {
-            dyn_array_restrict_insert_end(operations, &op);
-        }
-    }
-
-    return operations;
-}
-
 void pitch_template(const char *assembled_code, const char *template_file, const char *output_file)
 {
     if (!assembled_code || !template_file || !output_file) return;
