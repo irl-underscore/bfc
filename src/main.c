@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     assemble_ctx *ctx = ctx_init(1050);
     ctx_process(ctx, operations, ARC_X86_64_LINUX);
     char *code = ctx_assemble(ctx);
-    printf("%s\n", code);
+    pitch_code(code, "out.s");
     file_buf_destroy(buf);
     dyn_array_destroy(operations);
     ctx_destroy(ctx);
