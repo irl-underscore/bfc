@@ -15,11 +15,13 @@ int main(int argc, char *argv[])
 
     file_buf *buf = file_buf_load(argv[1]);
     dyn_array *operations = parse_file(buf);
-    for (size_t i = 0; i < dyn_array_get_size(operations); i++);
-    char *code = assemble(operations, ARC_X86_64_LINUX);
-    pitch_template(code, "template.s", "out.s");
+    assemble_ctx *ctx = ctx_init(1050);
+    ctx_process(ctx, operations, ARC_X86_64_LINUX);
+    char *code = ctx_assemble(ctx);
+    printf("%s\n", code);
     file_buf_destroy(buf);
     dyn_array_destroy(operations);
+    ctx_destroy(ctx);
     free(code);
     return 0;
 }

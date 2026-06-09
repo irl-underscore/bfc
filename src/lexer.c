@@ -1,7 +1,6 @@
 #include "lexer.h"
 
 #include "string.h"
-#include "type.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -15,6 +14,11 @@ static ir_type check_loop_start(char **root)
     }
 
     return IR_LLOOP;
+}
+
+static void check_loop_end(char **root)
+{
+    // ... in work
 }
 
 static void iterate_arythmic(dyn_array *operations, char **root, char *end)
