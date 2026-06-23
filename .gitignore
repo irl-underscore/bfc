@@ -1,12 +1,12 @@
-*.exe
-*.dll
-*.a
-*.bat
+**/*.exe
+**/*.dll
+**/*.a
+**/*.o
+**/*.bat
 
-*.txt
+**/*.txt
 
-debug/
-release/
+**/*.bf
+**/*.b
 
-# temporary
-main.bf
+!/examples/**/*.bf

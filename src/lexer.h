@@ -15,7 +15,8 @@ typedef enum ir_type
     IR_OUT,
     IR_IN,
     IR_LLOOP,
-    IR_RLOOP
+    IR_RLOOP,
+    IR_END
 } ir_type;
 
 typedef struct ir_operation
@@ -24,7 +25,7 @@ typedef struct ir_operation
     uint16_t count;
 } ir_operation;
 
-dyn_array *apply_o1_optimization(dyn_array *operations);
 dyn_array *parse_file(file_buf *buf);
+dyn_array *post_process(dyn_array *operations);
 
 #endif /* LEXER_H */

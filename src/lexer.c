@@ -2,141 +2,164 @@
 
 #include "string.h"
 
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-static ir_type check_loop_start(char **root)
+static ir_type get_type(char c)
 {
-    if (strncmp(*root, "[-]", 3) == 0)
+    switch (c)
     {
-        (*root) += 3;
-        return IR_CLEAR;
+        case '+': return IR_INC;
+        case '-': return IR_DEC;
+        case '<': return IR_LSHIFT;
+        case '>': return IR_RSHIFT;
+        case ',': return IR_IN;
+        case '.': return IR_OUT;
+        case '[': return IR_LLOOP;
+        case ']': return IR_RLOOP;
+        default: return 10;
     }
-
-    return IR_LLOOP;
-}
-
-static void check_loop_end(char **root)
-{
-    // ... in work
-}
-
-static void iterate_arythmic(dyn_array *operations, char **root, char *end)
-{
-    int64_t count = 0;
-    while (*root < end)
-    {
-        char curr = **root;
-        if (curr == '+')
-        {
-            count++;
-            (*root)++;
-        } else if (curr == '-')
-        {
-            count--;
-            (*root)++;
-        } else if (curr == '\n') (*root)++;
-        else if (check_loop_start(root) == IR_CLEAR) count = 0;
-        else
-        {
-            (*root)--;
-            break;
-        }
-    }
-
-    if (count != 0)
-    {
-        ir_operation res = {
-            .count = _abs64(count),
-            .type = (count < 0) ? IR_DEC : IR_INC
-        };
-
-        dyn_array_restrict_insert_end(operations, &res);
-    }
-}
-
-static void iterate_shift(dyn_array *operations, char **root, char *end)
-{
-    int64_t count = 0;
-    while (*root < end) {
-        char curr = **root;
-        if (curr == '<')
-        {
-            count--;
-            (*root)++;
-        }
-        else if (curr == '>')
-        {
-            count++;
-            (*root)++;
-        } else if (curr == '\n') (*root)++;
-        else
-        {
-            (*root)--;
-            break;
-        }
-    }
-
-    if (count != 0)
-    {
-        ir_operation res = {
-            .count = _abs64(count),
-            .type = (count < 0) ? IR_LSHIFT : IR_RSHIFT
-        };
-
-        dyn_array_restrict_insert_end(operations, &res);
-    }
-}
-
-static ir_operation translate_sign(char sign)
-{
-    ir_operation res = {
-        .count = 1
-    };
-
-    switch (sign)
-    {
-        case ',': res.type = IR_IN; break;
-        case '.': res.type = IR_OUT; break;
-        case '[': res.type = IR_LLOOP; break;
-        case ']': res.type = IR_RLOOP; break;
-    }
-
-    return res;
-}
-
-static void insert_loop_start(dyn_array *operations, char **root)
-{
-    ir_operation op = {
-        .type = check_loop_start(root),
-        .count = 1
-    };
-
-    dyn_array_restrict_insert_end(operations, &op);
 }
 
 dyn_array *parse_file(file_buf *buf)
 {
     if (!buf) return NULL;
 
-    dyn_array *operations = dyn_array_create(100, sizeof(ir_operation));
-    char *root = buf->data;
+    dyn_array *operations = dyn_array_create(200, sizeof(ir_operation));
+    char *data = buf->data;
     char *end = buf->data + buf->size;
-    for (char curr = *root; curr != '\0' && root <= end; ++root)
+    while (*data != '\0' || data < end)
     {
-        curr = *root;
-        ir_operation sign = translate_sign(curr);
-        switch (curr) {
-            case '+':
-            case '-': iterate_arythmic(operations, &root, end); break;
-            case '>':
-            case '<': iterate_shift(operations, &root, end); break;
-            case ',': dyn_array_restrict_insert_end(operations, &sign); break;
-            case '.': dyn_array_restrict_insert_end(operations, &sign); break;
-            case '[': insert_loop_start(operations, &root); break;
-            case ']': dyn_array_restrict_insert_end(operations, &sign); break;
+        ir_type type = get_type(*data);
+        if (type != 10)
+        {
+            ir_operation op = {
+                .type = type,
+                .count = 1
+            };
+
+            dyn_array_restrict_insert_end(operations, &op);
+        }
+        data++;
+    }
+
+    ir_operation end_op = {
+        .type = IR_END,
+        .count = 1
+    };
+
+    dyn_array_restrict_insert_end(operations, &end_op);
+    return operations;
+}
+
+static void iterate_arythmic(size_t *i, dyn_array *operations, dyn_array *dst, size_t end)
+{
+    int64_t count = 0;
+    for (; *i < end; (*i)++)
+    {
+        ir_operation op = *(ir_operation*)dyn_array_get(operations, *i);
+        if (op.type == IR_INC) count++;
+        else if (op.type == IR_DEC) count--;
+        else break;
+    }
+    if (count != 0)
+    {
+        ir_operation op = {
+            .type = (count < 0) ? IR_DEC : IR_INC,
+            .count = _abs64(count)
+        };
+
+        dyn_array_restrict_insert_end(dst, &op);
+    }
+}
+
+static void iterate_shift(size_t *i, dyn_array *operations, dyn_array *dst, size_t end)
+{
+    int64_t count = 0;
+    for (; *i < end; (*i)++)
+    {
+        ir_operation op = *(ir_operation*)dyn_array_get(operations, *i);
+        if (op.type == IR_RSHIFT) count++;
+        else if (op.type == IR_LSHIFT) count--;
+        else break;
+
+    }
+
+    if (count != 0)
+    {
+        ir_operation op = {
+            .type = (count < 0) ? IR_RSHIFT : IR_LSHIFT,
+            .count = _abs64(count)
+        };
+
+        dyn_array_restrict_insert_end(dst, &op);
+    }
+}
+
+static void check_loop(size_t *i, dyn_array *operations, dyn_array *dst, dyn_array *temp, size_t end);
+
+static void iterate_instructions(size_t *i, dyn_array *operations, dyn_array *dst, ir_type end_cond)
+{
+    dyn_array *temp = dyn_array_create(50, sizeof(ir_operation));
+    size_t end = dyn_array_get_size(operations);
+    while (*i < end)
+    {
+        ir_operation op = *(ir_operation*)dyn_array_get(operations, *i);
+        if (op.type == end_cond) break;
+
+        switch (op.type)
+        {
+            case IR_INC:
+            case IR_DEC: iterate_arythmic(i, operations, dst, end); break;
+            case IR_LSHIFT:
+            case IR_RSHIFT: iterate_shift(i, operations, dst, end); break;
+            case IR_LLOOP: check_loop(i, operations, dst, temp, end); break;
+            default: {
+                dyn_array_restrict_insert_end(dst, &op);
+                (*i)++;
+                break;
+            }
         }
     }
 
-    return operations;
+    dyn_array_destroy(temp);
+}
+
+static void check_loop(size_t *i, dyn_array *operations, dyn_array *dst, dyn_array *temp, size_t end)
+{
+    (*i)++;
+    iterate_instructions(i, operations, temp, IR_RLOOP);
+    size_t length = dyn_array_get_size(temp);
+    (*i)++;
+    if (length == 1)
+    {
+        ir_operation expec = *(ir_operation*)dyn_array_get(temp, 0);
+        if ((expec.type == IR_INC || expec.type == IR_DEC) && expec.count == 1)
+        {
+            ir_operation res = {
+                .type = IR_CLEAR,
+                .count = 1
+            };
+
+            dyn_array_insert_end(dst, &res);
+        }
+    } else
+    {
+        for (size_t i = 0; i < length; i++)
+        {
+            ir_operation *op = (ir_operation*)dyn_array_get(temp, i);
+            dyn_array_restrict_insert_end(dst, op);
+        }
+    }
+}
+
+dyn_array *post_process(dyn_array *operations)
+{
+    if (!operations) return NULL;
+
+    dyn_array *res = dyn_array_create(200, sizeof(ir_operation));
+    size_t i = 0;
+    iterate_instructions(&i, operations, res, IR_END);
+    return res;
 }

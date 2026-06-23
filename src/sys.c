@@ -129,7 +129,7 @@ static void emit_clear_op(arc_type type, string *dst)
 
     switch (type) {
         case ARC_X86_64_LINUX: {
-            string_append_string(dst, "\txorq %rbx, %rbx");
+            string_append_string(dst, "\txorq %rbx, %rbx\n");
             break;
         }
         case ARC_X86_LINUX: {
@@ -145,8 +145,8 @@ static void emit_lshift_op(arc_type type, string *dst, uint16_t count)
     switch (type)
     {
         case ARC_X86_64_LINUX: {
-            if (count == 0) string_append_string(dst, "\tdecq %rbx\n");
-            else if (count > 0) string_append_format(dst, "\tsubq $%d, %%rbx\n", count);
+            if (count == 1) string_append_string(dst, "\tdecq %rbx\n");
+            else if (count > 1) string_append_format(dst, "\tsubq $%d, %%rbx\n", count);
 
             break;
         }
@@ -162,8 +162,8 @@ static void emit_rshift_op(arc_type type, string *dst, uint16_t count)
     switch (type)
     {
         case ARC_X86_64_LINUX: {
-            if (count == 0) string_append_string(dst, "\tincq %rbx\n");
-            else if (count > 0) string_append_format(dst, "\taddq $%d, %%rbx\n", count);
+            if (count == 1) string_append_string(dst, "\tincq %rbx\n");
+            else if (count > 1) string_append_format(dst, "\taddq $%d, %%rbx\n", count);
 
             break;
         }
@@ -178,7 +178,15 @@ static void emit_loop_start(arc_type type, string *dst, uint16_t *loop_count, st
 
     switch (type)
     {
-        case ARC_X86_64_LINUX: string_append_format(dst, ".L%d_:\n", ++(*loop_count)); push(loop_stack, *loop_count);  break;
+        case ARC_X86_64_LINUX:
+        {
+            string_append_format(dst, ".L%d_start:\n", ++(*loop_count));
+            push(loop_stack, *loop_count);
+            string_append_string(dst, "\tcmpb %rbx, $0\n");
+            string_append_format(dst, "\tje .L%d_end\n", *loop_count);
+            break;
+        }
+
         case ARC_X86_LINUX: break; // ...
     }
 }
@@ -190,8 +198,9 @@ static void emit_loop_end(arc_type type, string *dst, stack *loop_stack)
     switch (type)
     {
         case ARC_X86_64_LINUX: {
-            string_append_string(dst, "\tcmpb (%rbx), $0\n");
-            string_append_format(dst, "\tjne .L%d_\n", pop(loop_stack));
+            uint16_t loop_count = pop(loop_stack);
+            string_append_format(dst, "\tjmp .L%d_start\n", loop_count);
+            string_append_format(dst, ".L%d_end:\n", loop_count);
             break;
         }
 
