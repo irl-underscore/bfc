@@ -161,5 +161,11 @@ dyn_array *post_process(dyn_array *operations)
     dyn_array *res = dyn_array_create(200, sizeof(ir_operation));
     size_t i = 0;
     iterate_instructions(&i, operations, res, IR_END);
+    ir_operation end = {
+        .type = IR_END,
+        .count = 1
+    };
+
+    dyn_array_restrict_insert_end(res, &end);
     return res;
 }

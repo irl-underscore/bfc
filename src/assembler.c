@@ -43,7 +43,6 @@ void ctx_process(assemble_ctx *ctx, dyn_array *operations, arc_type type)
 
     emit_tape_reg_init(ctx->text, type);
     process_intructions(type, ctx->text, operations);
-    emit_syscall(type, ctx->text, BF_CALL_EXIT, "$0", NULL, NULL);
 }
 
 char *ctx_assemble(assemble_ctx *ctx)

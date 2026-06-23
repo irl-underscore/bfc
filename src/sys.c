@@ -229,6 +229,7 @@ static void process_intructions(arc_type type, string *dst, dyn_array *operation
             case IR_RLOOP: emit_loop_end(type, dst, loop_stack); break;
             case IR_IN: emit_syscall(type, dst, BF_CALL_READ, "$0", "%rbx", "$1"); break;
             case IR_OUT: emit_syscall(type, dst, BF_CALL_WRITE, "$1", "%rbx", "$1"); break;
+            case IR_END: emit_syscall(type, dst, BF_CALL_EXIT, "$0", NULL, NULL); break;
         }
     }
 }
