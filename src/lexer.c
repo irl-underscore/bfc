@@ -146,11 +146,24 @@ static void check_loop(size_t *i, dyn_array *operations, dyn_array *dst, dyn_arr
         }
     } else
     {
+        ir_operation start = {
+            .type = IR_LLOOP,
+            .count = 1
+        };
+
+        dyn_array_restrict_insert_end(dst, &start);
         for (size_t i = 0; i < length; i++)
         {
             ir_operation *op = (ir_operation*)dyn_array_get(temp, i);
             dyn_array_restrict_insert_end(dst, op);
         }
+
+        ir_operation end = {
+            .type = IR_RLOOP,
+            .count = 1
+        };
+
+        dyn_array_restrict_insert_end(dst, &end);
     }
 }
 
