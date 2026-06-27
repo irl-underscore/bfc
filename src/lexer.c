@@ -97,7 +97,7 @@ static void iterate_shift(size_t *i, dyn_array *operations, dyn_array *dst, size
     }
 }
 
-static void check_loop(size_t *i, dyn_array *operations, dyn_array *dst, dyn_array *temp, size_t end);
+static void check_loop(size_t *i, dyn_array *operations, dyn_array *dst, dyn_array *temp);
 
 static void iterate_instructions(size_t *i, dyn_array *operations, dyn_array *dst, ir_type end_cond)
 {
@@ -114,7 +114,7 @@ static void iterate_instructions(size_t *i, dyn_array *operations, dyn_array *ds
             case IR_DEC: iterate_arythmic(i, operations, dst, end); break;
             case IR_LSHIFT:
             case IR_RSHIFT: iterate_shift(i, operations, dst, end); break;
-            case IR_LLOOP: check_loop(i, operations, dst, temp, end); break;
+            case IR_LLOOP: check_loop(i, operations, dst, temp); break;
             default: {
                 dyn_array_restrict_insert_end(dst, &op);
                 (*i)++;
@@ -126,7 +126,7 @@ static void iterate_instructions(size_t *i, dyn_array *operations, dyn_array *ds
     dyn_array_destroy(temp);
 }
 
-static void check_loop(size_t *i, dyn_array *operations, dyn_array *dst, dyn_array *temp, size_t end)
+static void check_loop(size_t *i, dyn_array *operations, dyn_array *dst, dyn_array *temp)
 {
     (*i)++;
     iterate_instructions(i, operations, temp, IR_RLOOP);
@@ -143,28 +143,25 @@ static void check_loop(size_t *i, dyn_array *operations, dyn_array *dst, dyn_arr
             };
 
             dyn_array_insert_end(dst, &res);
+            return;
         }
-    } else
-    {
-        ir_operation start = {
-            .type = IR_LLOOP,
-            .count = 1
-        };
-
-        dyn_array_restrict_insert_end(dst, &start);
-        for (size_t i = 0; i < length; i++)
-        {
-            ir_operation *op = (ir_operation*)dyn_array_get(temp, i);
-            dyn_array_restrict_insert_end(dst, op);
-        }
-
-        ir_operation end = {
-            .type = IR_RLOOP,
-            .count = 1
-        };
-
-        dyn_array_restrict_insert_end(dst, &end);
     }
+
+    ir_operation start = {
+        .type = IR_LLOOP,
+        .count = 1
+    };
+    dyn_array_restrict_insert_end(dst, &start);
+    for (size_t i = 0; i < length; i++)
+    {
+        ir_operation op = *(ir_operation*)dyn_array_get(temp, i);
+        dyn_array_restrict_insert_end(dst, &op);
+    }
+    ir_operation end = {
+        .type = IR_RLOOP,
+        .count = 1
+    };
+    dyn_array_restrict_insert_end(dst, &end);
 }
 
 dyn_array *post_process(dyn_array *operations)
