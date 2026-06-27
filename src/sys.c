@@ -7,6 +7,7 @@
 #include "syscall/x86_64_linux.h"
 
 #include <string.h>
+#include <stdio.h>
 
 /*
  * Syscalls
@@ -52,7 +53,14 @@ static void emit_x86_64_linux(string *dst, bf_call call, char *arg0, char *arg1,
         return;
     }
 
-    string_append_format(dst, "\tmovq $%d, %%rax\n", syscall);
+    if (syscall == 0)
+    {
+        string_append_string(dst, "\txorq %rax, %rax\n");
+    } else
+    {
+        string_append_format(dst, "\tmovq $%d, %%rax\n", syscall);
+    }
+
     if (arg0)
     {
         if (strncmp(arg0, "$0", 2) == 0) string_append_string(dst, "\txorq %rdi, %rdi\n");
@@ -208,11 +216,69 @@ static void emit_loop_end(arc_type type, string *dst, stack *loop_stack)
     }
 }
 
+static void emit_flush(arc_type type, string *dst, uint16_t *outs)
+{
+    if (*outs == 0) return;
+
+    string *count_str = string_create(3);
+    string_append_format(count_str, "$%u", *outs);
+    string_append_string(dst, "\tlea print_buf(%rip), %rsi\n");
+    emit_syscall(type, dst, BF_CALL_WRITE, "$1", NULL, string_get_raw(count_str));
+    *outs = 0;
+    string_append_string(dst, "\txorq %rcx, %rcx\n");
+    string_destroy(count_str);
+}
+
+static void emit_out_op(arc_type type, string *dst, uint16_t *outs)
+{
+    switch (type)
+    {
+        case ARC_X86_64_LINUX: {
+            if (*outs == 20)
+            {
+                emit_flush(type, dst, outs);
+            } else
+            {
+                string_append_string(dst, "\tmovb (%rbx), %al\n");
+                string_append_string(dst, "\tmovb %al, print_buf(, %rcx, 1)\n");
+                string_append_string(dst, "\tincq %rcx\n");
+                (*outs)++;
+            }
+
+            break;
+        }
+
+        case ARC_X86_LINUX: {
+            // ....
+            break;
+        }
+    }
+}
+
+static void emit_in_op(arc_type type, string *dst, uint16_t *outs)
+{
+    switch (type)
+    {
+        case ARC_X86_64_LINUX: {
+            if (*outs >= 1)
+            {
+                emit_flush(type, dst, outs);
+            }
+
+            emit_syscall(type, dst, BF_CALL_READ, "$0", "%rbx", "$1");
+            break;
+        }
+
+        case ARC_X86_LINUX: break;
+    }
+}
+
 static void process_intructions(arc_type type, string *dst, dyn_array *operations)
 {
     if (!dst) return;
 
     uint16_t loops = 0;
+    uint16_t outs = 0;
     stack *loop_stack = stack_create();
     size_t arr_size = dyn_array_get_size(operations);
     for (size_t i = 0; i < arr_size; i++)
@@ -227,9 +293,9 @@ static void process_intructions(arc_type type, string *dst, dyn_array *operation
             case IR_RSHIFT: emit_rshift_op(type, dst, op.count); break;
             case IR_LLOOP: emit_loop_start(type, dst, &loops, loop_stack); break;
             case IR_RLOOP: emit_loop_end(type, dst, loop_stack); break;
-            case IR_IN: emit_syscall(type, dst, BF_CALL_READ, "$0", "%rbx", "$1"); break;
-            case IR_OUT: emit_syscall(type, dst, BF_CALL_WRITE, "$1", "%rbx", "$1"); break;
-            case IR_END: emit_syscall(type, dst, BF_CALL_EXIT, "$0", NULL, NULL); break;
+            case IR_IN: emit_in_op(type, dst, &outs); break;
+            case IR_OUT: emit_out_op(type, dst, &outs); break;
+            case IR_END: emit_flush(type, dst, &outs); emit_syscall(type, dst, BF_CALL_EXIT, "$0", NULL, NULL); break;
         }
     }
 }

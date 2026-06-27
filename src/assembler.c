@@ -22,12 +22,14 @@ assemble_ctx *ctx_init(size_t tape_size)
     ctx->bss = string_create(50);
     string_append_string(ctx->bss, ".section .bss\n");
     string_append_string(ctx->bss, "\t.align 64\n");
-    string_append_format(ctx->bss, "\t.lcomm, tape %zu\n", tape_size);
+    string_append_format(ctx->bss, "\t.lcomm tape, %zu\n", tape_size);
+    string_append_string(ctx->bss, "\t.lcomm print_buf, 20\n");
 
     ctx->text = string_create(100);
     string_append_string(ctx->text, ".section .text\n");
     string_append_string(ctx->text, ".global _start\n");
     string_append_string(ctx->text, "_start:\n");
+    string_append_string(ctx->text, "\txorq %rcx, %rcx\n");
 
     ctx->data = string_create(50);
     string_append_string(ctx->data, ".section .data\n");

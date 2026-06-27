@@ -89,7 +89,7 @@ static void iterate_shift(size_t *i, dyn_array *operations, dyn_array *dst, size
     if (count != 0)
     {
         ir_operation op = {
-            .type = (count < 0) ? IR_RSHIFT : IR_LSHIFT,
+            .type = (count < 0) ? IR_LSHIFT : IR_RSHIFT,
             .count = _abs64(count)
         };
 
