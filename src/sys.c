@@ -190,7 +190,7 @@ static void emit_loop_start(arc_type type, string *dst, uint16_t *loop_count, st
         {
             string_append_format(dst, ".L%d_start:\n", ++(*loop_count));
             push(loop_stack, *loop_count);
-            string_append_string(dst, "\tcmpb %rbx, $0\n");
+            string_append_string(dst, "\tcmpb $0, (%rbx)\n");
             string_append_format(dst, "\tje .L%d_end\n", *loop_count);
             break;
         }
