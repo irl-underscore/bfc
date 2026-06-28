@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     file_buf_destroy(buf);
     dyn_array *opt = post_process(operations);
     assemble_ctx *ctx = ctx_init(1050);
-    ctx_process(ctx, opt, ARC_X86_LINUX);
+    ctx_process(ctx, opt, ARC_X86_64_LINUX);
     dyn_array_destroy(opt);
     char *code = ctx_assemble(ctx);
     ctx_destroy(ctx);

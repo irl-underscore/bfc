@@ -1,6 +1,7 @@
 #include "assembler.h"
 
 #include "dyn_string.h"
+#include "sys.c"
 
 #include <stdlib.h>
 #include <string.h>
@@ -36,8 +37,6 @@ assemble_ctx *ctx_init(size_t tape_size)
     ctx->use_data = 0;
     return ctx;
 }
-
-#include "sys.c"
 
 void ctx_process(assemble_ctx *ctx, dyn_array *operations, arc_type type)
 {

@@ -249,8 +249,7 @@ static void emit_flush(arc_type type, string *dst, uint16_t *outs)
         case ARC_X86_64_LINUX: {
             string *count_str = string_create(3);
             string_append_format(count_str, "$%u", *outs);
-            string_append_string(dst, "\tlea print_buf(%rip), %rsi\n");
-            emit_syscall(type, dst, BF_CALL_WRITE, "$1", NULL, string_get_raw(count_str));
+            emit_syscall(type, dst, BF_CALL_WRITE, "$1", "%rdx", string_get_raw(count_str));
             *outs = 0;
             string_append_string(dst, "\txorq %rcx, %rcx\n");
             string_destroy(count_str);
@@ -260,8 +259,7 @@ static void emit_flush(arc_type type, string *dst, uint16_t *outs)
         case ARC_X86_LINUX: {
             string *count_str = string_create(3);
             string_append_format(count_str, "$%u", *outs);
-            string_append_string(dst, "\tlea print_buf(%rip), %ecx\n");
-            emit_syscall(type, dst, BF_CALL_WRITE, "$1", NULL, string_get_raw(count_str));
+            emit_syscall(type, dst, BF_CALL_WRITE, "$1", NULL, string_get_raw(count_str)); // Still figuring out what register to use for that
             *outs = 0;
             string_append_string(dst, "\txorl %ecx, %ecx\n");
             string_destroy(count_str);
@@ -281,7 +279,7 @@ static void emit_out_op(arc_type type, string *dst, uint16_t *outs)
             } else
             {
                 string_append_string(dst, "\tmovb (%rbx), %al\n");
-                string_append_string(dst, "\tmovb %al, print_buf(, %rcx, 1)\n");
+                string_append_string(dst, "\tmovb %al, (%rdx, %rcx, 1)\n");
                 string_append_string(dst, "\tincq %rcx\n");
                 (*outs)++;
             }
@@ -296,7 +294,7 @@ static void emit_out_op(arc_type type, string *dst, uint16_t *outs)
             } else
             {
                 string_append_string(dst, "\tmovb (%edi), %al\n");
-                string_append_string(dst, "\tmovb %al, print_buf(, %ecx, 1)\n");
+                string_append_string(dst, "\tmovb %al, (%rdx, %ecx, 1)\n");
                 string_append_string(dst, "\tincl %ecx\n");
                 (*outs)++;
             }
@@ -363,7 +361,7 @@ static void emit_tape_reg_init(string *text, arc_type type)
 {
     switch (type)
     {
-        case ARC_X86_64_LINUX: string_append_string(text, "\tlea tape(%rip), %rbx\n"); break;
+        case ARC_X86_64_LINUX: string_append_string(text, "\tlea tape(%rip), %rbx\n"); string_append_string(text, "\tlea print_buf(%rip), %rdx\n"); break;
         case ARC_X86_LINUX: string_append_string(text, "\tlea tape(%rip), %edi\n"); break;
     }
 }
