@@ -10,6 +10,8 @@ else
     RUN_CMD = ./$(DEBUG) main.bf && echo Program finished.
 endif
 
+RWILDCARD = $(foreach d,$(wildcard $(1:=/*)),$(call RWILDCARD,$d,$2) $(filter $(subst *,%,$2),$d))
+
 CC := clang
 CFLAGS := -Wall -Wextra -std=c99
 RELFLAGS := -O3
@@ -22,7 +24,7 @@ RELEASE_DIR := release
 RELEASE_OBJ_DIR := $(RELEASE_DIR)/obj
 SRC_DIR := src
 
-SRCS := $(wildcard $(SRC_DIR)/*.c)
+SRCS := $(call RWILDCARD,$(SRC_DIR),*.c)
 DEBUG_OBJS := $(patsubst $(SRC_DIR)/%.c, $(DEBUG_OBJ_DIR)/%.o, $(SRCS))
 RELEASE_OBJS := $(patsubst $(SRC_DIR)/%.c, $(RELEASE_OBJ_DIR)/%.o, $(SRCS))
 PROJECT := brainfuck
@@ -41,6 +43,7 @@ rel: $(RELEASE_OBJS) | $(RELEASE_DIR)
 	$(CC) $(CFLAGS) $(RELFLAGS) $^ -o $(RELEASE)
 
 $(DEBUG_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(DEBUG_OBJ_DIR)
+	$(call MKDIR,$(dir $@))
 	$(CC) $(CFLAGS) $(DBFLAGS) -c $< -o $@
 
 $(RELEASE_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(RELEASE_OBJ_DIR)

@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 /*
- * Note: That file is just temporary until I know what to do with the byte typedef
+ * Note: That file is just temporary until I know what to do with the typedefs
  */
 
 typedef unsigned char byte;

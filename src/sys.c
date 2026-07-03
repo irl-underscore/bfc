@@ -3,8 +3,7 @@
 #include "stack.h"
 #include "lexer.h"
 
-#include "syscall/x86_linux.h"
-#include "syscall/x86_64_linux.h"
+#include "tables/syscall/syscall_tables.h"
 
 #include <string.h>
 #include <stdio.h>
