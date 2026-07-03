@@ -4,7 +4,7 @@
 
 typedef struct compiler_options
 {
-    uint8_t debug;
+    uint8_t help;
     char *output;
     char *input;
 } compiler_options;

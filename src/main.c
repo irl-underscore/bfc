@@ -7,8 +7,13 @@
 
 #include <stdio.h>
 
+void print_help(void)
+{
+    printf("Still working on that one :)");
+}
+
 compiler_options opt = {
-    .debug = 0,
+    .help = 0,
     .output = "a.exe",
     .input = "main.bf"
 };
@@ -16,7 +21,12 @@ compiler_options opt = {
 int main(int argc, char *argv[])
 {
     process_args(argv, argc, &opt);
-    printf("Debug: %u", opt.debug);
+    if (opt.help == 1)
+    {
+        print_help();
+        return 0;
+    }
+
     file_buf *buf = file_buf_load(opt.input);
     dyn_array *operations = parse_file(buf);
     file_buf_destroy(buf);
