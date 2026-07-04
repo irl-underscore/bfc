@@ -5,22 +5,19 @@
 typedef enum flag_type {
     FLAG_TYPE_BOOL,
     FLAG_TYPE_STRING,
-    FLAG_TYPE_FUNCTION
+    FLAG_TYPE_CUSTOM
 } flag_type;
 
-typedef struct args_map
+typedef struct flag
 {
     char short_form;
     char *long_form;
     flag_type type;
-    union
-    {
-        void (*func)();
-        uint8_t offset;
-    } contents;
-} args_map;
+    uint8_t offset;
+    void (*process)(char *, void *, uint8_t);
+} flag;
 
-extern args_map map[];
+extern flag map[];
 extern size_t map_len;
 
 #endif /* ARGS_MAP_H */
