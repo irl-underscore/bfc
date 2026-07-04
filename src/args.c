@@ -78,6 +78,7 @@ void process_args(char *argv[], int32_t argc, compiler_options *options)
         } else
         {
             current_idx++; // handeled later
+            if (current_idx >= argc) break;
             continue;
         }
 
