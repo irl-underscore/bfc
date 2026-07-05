@@ -10,7 +10,7 @@ typedef enum
 
 typedef struct assemble_ctx assemble_ctx;
 
-assemble_ctx *ctx_init(size_t tape_size);
+assemble_ctx *ctx_init(uint32_t tape_size);
 void ctx_process(assemble_ctx *ctx, dyn_array *instructions, arc_type type);
 char *ctx_assemble(assemble_ctx *ctx);
 void ctx_destroy(assemble_ctx *ctx);

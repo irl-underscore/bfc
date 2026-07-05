@@ -14,7 +14,7 @@ struct assemble_ctx
     string *data;
 };
 
-assemble_ctx *ctx_init(size_t tape_size)
+assemble_ctx *ctx_init(uint32_t tape_size)
 {
     tape_size = (tape_size == 0) ? 1 : tape_size;
     assemble_ctx *ctx = malloc(sizeof(assemble_ctx));

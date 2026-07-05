@@ -20,6 +20,7 @@ void print_version(void)
 compiler_options opt = {
     .help = 0,
     .version = 0,
+    .tape_size = 1050,
     .target = ARC_X86_64_LINUX,
     .output = "a.s",
     .input = NULL,
@@ -42,10 +43,12 @@ int main(int argc, char *argv[])
     if (opt.input)
     {
         file_buf *buf = file_buf_load(opt.input);
+        if (!buf) return 1;
+
         dyn_array *operations = parse_file(buf);
         file_buf_destroy(buf);
         dyn_array *optimized = post_process(operations);
-        assemble_ctx *ctx = ctx_init(1050);
+        assemble_ctx *ctx = ctx_init(opt.tape_size);
         ctx_process(ctx, optimized, opt.target);
         dyn_array_destroy(optimized);
         char *code = ctx_assemble(ctx);

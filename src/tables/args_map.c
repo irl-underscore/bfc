@@ -1,7 +1,6 @@
 #include "../args.h"
 
 #include "args_map.h"
-#include "../type.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -11,21 +10,46 @@ void process_target_arc(char *arg, void *mem)
 {
     if (strncmp(arg, "x86_64_linux", 30) == 0)
     {
-        *(arc_type*)((byte*)mem + sizeof(flag_mem_instruction)) = (arc_type)ARC_X86_64_LINUX;
+        write_data(mem, (arc_type*)ARC_X86_64_LINUX, sizeof(arc_type));
     } else if (strncmp(arg, "x86_linux", 30) == 0)
     {
-        *(arc_type*)((byte*)mem + sizeof(flag_mem_instruction)) = (arc_type)ARC_X86_LINUX;
+        write_data(mem, (arc_type*)ARC_X86_LINUX, sizeof(arc_type));
     } else
     {
         fprintf(stderr, "Error: Unkown arcitecture: '%s'\n", arg);
     }
 }
 
+static uint8_t is_num(char a)
+{
+    return (a <= '9' && a >= '0');
+}
+
+void process_num(char *arg, void *mem)
+{
+    uint32_t res = 0;
+    uint8_t arg_len = (uint8_t)strnlen(arg, 5);
+    for (uint8_t i = 0; i < arg_len; i++)
+    {
+        if (is_num(arg[i]))
+        {
+            res = (res * 10) + (arg[i] - '0');
+        } else
+        {
+            fprintf(stderr, "Error: non number in '%s'\n", arg);
+            return;
+        }
+    }
+
+    write_data(mem, &res, sizeof(uint32_t));
+}
+
 flag map[] = {
     {'o', NULL, FLAG_TYPE_STRING, FLAG_POS_NEXT, offsetof(compiler_options, output), NULL},
     {'h', "help", FLAG_TYPE_BOOL, FLAG_POS_THIS, offsetof(compiler_options, help), NULL},
     {'v', "version", FLAG_TYPE_BOOL, FLAG_POS_THIS, offsetof(compiler_options, version), NULL},
-    {'t', "target", FLAG_TYPE_CUSTOM, FLAG_POS_NEXT, offsetof(compiler_options, target), process_target_arc}
+    {'t', "target", FLAG_TYPE_CUSTOM, FLAG_POS_NEXT, offsetof(compiler_options, target), process_target_arc},
+    {'p', "tape", FLAG_TYPE_CUSTOM, FLAG_POS_NEXT, offsetof(compiler_options, tape_size), process_num}
 };
 
 size_t map_len = sizeof(map);
