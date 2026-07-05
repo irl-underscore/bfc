@@ -45,11 +45,11 @@ void process_num(char *arg, void *mem)
 }
 
 flag map[] = {
-    {'o', NULL, FLAG_TYPE_STRING, FLAG_POS_NEXT, offsetof(compiler_options, output), NULL},
     {'h', "help", FLAG_TYPE_BOOL, FLAG_POS_THIS, offsetof(compiler_options, help), NULL},
     {'v', "version", FLAG_TYPE_BOOL, FLAG_POS_THIS, offsetof(compiler_options, version), NULL},
+    {'p', "tape", FLAG_TYPE_CUSTOM, FLAG_POS_NEXT, offsetof(compiler_options, tape_size), process_num},
     {'t', "target", FLAG_TYPE_CUSTOM, FLAG_POS_NEXT, offsetof(compiler_options, target), process_target_arc},
-    {'p', "tape", FLAG_TYPE_CUSTOM, FLAG_POS_NEXT, offsetof(compiler_options, tape_size), process_num}
+    {'o', NULL, FLAG_TYPE_STRING, FLAG_POS_NEXT, offsetof(compiler_options, output), NULL},
 };
 
 size_t map_len = sizeof(map);
