@@ -22,7 +22,7 @@ compiler_options opt = {
     .version = 0,
     .target = ARC_X86_64_LINUX,
     .output = "a.s",
-    .input = "a.bf",
+    .input = NULL,
 };
 
 int main(int argc, char *argv[])
@@ -39,16 +39,20 @@ int main(int argc, char *argv[])
         print_version();
     }
 
-    file_buf *buf = file_buf_load(opt.input);
-    dyn_array *operations = parse_file(buf);
-    file_buf_destroy(buf);
-    dyn_array *optimized = post_process(operations);
-    assemble_ctx *ctx = ctx_init(1050);
-    ctx_process(ctx, optimized, opt.target);
-    dyn_array_destroy(optimized);
-    char *code = ctx_assemble(ctx);
-    ctx_destroy(ctx);
-    pitch_code(code, opt.output);
-    free(code);
+    if (opt.input)
+    {
+        file_buf *buf = file_buf_load(opt.input);
+        dyn_array *operations = parse_file(buf);
+        file_buf_destroy(buf);
+        dyn_array *optimized = post_process(operations);
+        assemble_ctx *ctx = ctx_init(1050);
+        ctx_process(ctx, optimized, opt.target);
+        dyn_array_destroy(optimized);
+        char *code = ctx_assemble(ctx);
+        ctx_destroy(ctx);
+        pitch_code(code, opt.output);
+        free(code);
+    }
+
     return 0;
 }

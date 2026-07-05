@@ -9,7 +9,7 @@
 
 #define MAX_CUSTOM_FLAG_MEMORY 8
 
-static uint8_t execute_flag(flag f, compiler_options *options, char *next, void *mem)
+static uint8_t execute_flag(flag f, compiler_options *options, char *this, char *next, void *mem)
 {
     switch (f.type)
     {
@@ -19,10 +19,13 @@ static uint8_t execute_flag(flag f, compiler_options *options, char *next, void 
         }
 
         case FLAG_TYPE_STRING: {
-            if (next)
+            if (f.pos == FLAG_POS_NEXT && next)
             {
                 *(char**)((byte*)options + f.offset) = next;
 
+            } else if (f.pos == FLAG_POS_THIS && this)
+            {
+                *(char**)((byte*)options + f.offset) = this;
             } else
             {
                 fprintf(stderr, "Error: Flag is missing parameter\n");
@@ -31,8 +34,21 @@ static uint8_t execute_flag(flag f, compiler_options *options, char *next, void 
             return 2;
         }
         case FLAG_TYPE_CUSTOM: {
-            f.process(next, mem, MAX_CUSTOM_FLAG_MEMORY);
-            *((byte*)options + f.offset) = *(byte*)mem;
+            if (f.pos == FLAG_POS_NEXT && next)
+            {
+                f.process(next, mem);
+            } else if (f.pos == FLAG_POS_THIS && this)
+            {
+                f.process(this, mem);
+            }
+
+            flag_mem_instruction inst = *(flag_mem_instruction*)mem;
+            switch (inst)
+            {
+                case FMI_SET: *((byte*)options + f.offset) = *((byte*)mem + sizeof(flag_mem_instruction)); break;
+                case FMI_XOR: *((byte*)options + f.offset) ^= *((byte*)mem + sizeof(flag_mem_instruction)); break;
+            }
+
             return 2;
         }
     }
@@ -44,7 +60,7 @@ static uint8_t check_short(char *argv[], int32_t argc, compiler_options *options
     uint8_t res = 1;
     if (arg[0] == map[*i].short_form && arg[1] == '\0')
     {
-        res = execute_flag(map[*i], options, argv[current_idx + 1], mem);
+        res = execute_flag(map[*i], options, arg + 1, argv[current_idx + 1], mem);
         *i = 0;
     } else
     {
@@ -58,19 +74,29 @@ static uint8_t check_short(char *argv[], int32_t argc, compiler_options *options
 static uint8_t check_long(char *argv[], int32_t argc, compiler_options *options, size_t *i, int32_t current_idx, void *mem)
 {
     char *arg = argv[current_idx] + 2;
-    size_t flag_len = strnlen(map[*i].long_form, 6);
     uint8_t res = 1;
-    if (map[*i].long_form && strncmp(arg, map[*i].long_form, flag_len) == 0)
+    if (map[*i].long_form)
     {
-        res = execute_flag(map[*i], options, argv[current_idx + 1], mem);
-        *i = 0;
+        size_t flag_len = strnlen(map[*i].long_form, 10);
+        if (map[*i].long_form && strncmp(arg, map[*i].long_form, flag_len) == 0)
+        {
+            res = execute_flag(map[*i], options, arg + flag_len, argv[current_idx + 1], mem);
+            *i = 0;
+        } else
+        {
+            goto call_self;
+        }
     } else
     {
-        (*i)++;
-        if (*i < map_len) return check_long(argv, argc, options, i, current_idx, mem);
+        goto call_self;
     }
 
     return res;
+
+    call_self:
+    (*i)++;
+    if (*i < map_len) return check_long(argv, argc, options, i, current_idx, mem);
+    else return res;
 }
 
 void process_args(char *argv[], int32_t argc, compiler_options *options)

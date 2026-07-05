@@ -4,6 +4,12 @@
 
 #include <stdint.h>
 
+typedef enum flag_mem_instruction
+{
+    FMI_SET,
+    FMI_XOR
+} flag_mem_instruction;
+
 typedef struct compiler_options
 {
     uint8_t help;
