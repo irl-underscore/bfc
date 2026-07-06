@@ -2,12 +2,10 @@ ifeq ($(OS), Windows_NT)
     MKDIR = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
     CLEAN = if exist "$(subst /,\,$(1))" rd /s /q "$(subst /,\,$(1))"
     EXE := .exe
-    RUN_CMD = $(subst /,\,$(DEBUG))$(EXE) main.bf & echo Program finished with exit code: %errorlevel%
 else
     MKDIR = mkdir -p $(1)
     CLEAN = rm -rf $(1)
     EXE :=
-    RUN_CMD = ./$(DEBUG) main.bf && echo Program finished.
 endif
 
 RWILDCARD = $(foreach d,$(wildcard $(1:=/*)),$(call RWILDCARD,$d,$2) $(filter $(subst *,%,$2),$d))
@@ -52,9 +50,6 @@ $(RELEASE_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(RELEASE_OBJ_DIR)
 
 $(DEBUG_DIR) $(RELEASE_DIR) $(DEBUG_OBJ_DIR) $(RELEASE_OBJ_DIR):
 	$(call MKDIR,$@)
-
-run: $(DEBUG)
-	@$(RUN_CMD)
 
 clean:
 	$(call CLEAN,$(DEBUG_DIR))
