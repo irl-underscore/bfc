@@ -1,3 +1,4 @@
+# Ignore binary output files
 **/*.exe
 **/*.dll
 **/*.a
@@ -5,9 +6,9 @@
 **/*.d
 **/*.bat
 
+# ...
 **/*.txt
 
+# Ognore test brainfuck files
 **/*.bf
 **/*.b
-
-!/examples/**/*.bf
