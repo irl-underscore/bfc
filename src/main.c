@@ -1,21 +1,9 @@
-#include <stdlib.h>
-
 #include "lexer.h"
 #include "assembler.h"
 #include "file.h"
 #include "args.h"
 
-#include <stdio.h>
-
-void print_help(void)
-{
-    printf("Still working on that one :)\n");
-}
-
-void print_version(void)
-{
-    printf("Not done yet :)\n");
-}
+#include <stdlib.h>
 
 compiler_options opt = {
     .help = 0,
@@ -29,17 +17,6 @@ compiler_options opt = {
 int main(int argc, char *argv[])
 {
     process_args(argv, argc, &opt);
-    if (opt.help == 1)
-    {
-        print_help();
-        return 0;
-    }
-
-    if (opt.version == 1)
-    {
-        print_version();
-    }
-
     if (opt.input)
     {
         file_buf *buf = file_buf_load(opt.input);

@@ -13,7 +13,7 @@ endif
 RWILDCARD = $(foreach d,$(wildcard $(1:=/*)),$(call RWILDCARD,$d,$2) $(filter $(subst *,%,$2),$d))
 
 CC := clang
-CFLAGS := -Wall -Wextra -std=c99
+CFLAGS := -Wall -Wextra -std=c99 -MMD
 RELFLAGS := -O3
 DBFLAGS := -g -DDEBUG=1
 

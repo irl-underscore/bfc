@@ -47,6 +47,7 @@ static uint8_t execute_flag(flag f, compiler_options *options, char *this, char 
     {
         case FLAG_TYPE_BOOL: {
             *((byte*)options + f.offset) = 1;
+            break;
         }
 
         case FLAG_TYPE_STRING: {
@@ -62,16 +63,18 @@ static uint8_t execute_flag(flag f, compiler_options *options, char *this, char 
             {
                 fprintf(stderr, "Error: Flag is missing parameter\n");
             }
+
+            break;
         }
 
         case FLAG_TYPE_CUSTOM: {
             if (f.pos == FLAG_POS_NEXT && next)
             {
-                f.process(next, mem);
+                f.custom_func(next, mem);
                 res = 2;
             } else if (f.pos == FLAG_POS_THIS && this)
             {
-                f.process(this, mem);
+                f.custom_func(this, mem);
             }
 
             uint8_t size = get_size(mem);
@@ -79,6 +82,16 @@ static uint8_t execute_flag(flag f, compiler_options *options, char *this, char 
             mem = (byte*)mem + 2 + offset;
             memcpy((byte*)options + f.offset, mem, size); break;
             memset(mem, 0, 2 + MAX_CUSTOM_FLAG_MEMORY);
+            break;
+        }
+
+        case FLAG_TYPE_FUNCTION: {
+            if (f.func)
+            {
+                f.func();
+            }
+
+            break;
         }
     }
 
@@ -113,6 +126,7 @@ static uint8_t check_long(char *argv[], int32_t argc, compiler_options *options,
         {
             res = execute_flag(map[*i], options, arg + flag_len, argv[current_idx + 1], mem);
             *i = 0;
+            goto ret;
         } else
         {
             goto call_self;
@@ -122,12 +136,13 @@ static uint8_t check_long(char *argv[], int32_t argc, compiler_options *options,
         goto call_self;
     }
 
+    ret:
     return res;
 
     call_self:
     (*i)++;
     if (*i < map_len) return check_long(argv, argc, options, i, current_idx, mem);
-    else return res;
+    else goto ret;
 }
 
 void process_args(char *argv[], int32_t argc, compiler_options *options)
@@ -149,7 +164,7 @@ void process_args(char *argv[], int32_t argc, compiler_options *options)
         } else
         {
             size_t len = strnlen(arg, 15);
-            if (strncmp(arg + len - 3, ".bf", 3) == 0)
+            if (strncmp(arg + (len - 3), ".bf", 3) == 0)
             {
                 options->input = arg;
             }

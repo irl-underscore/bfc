@@ -6,7 +6,8 @@ typedef enum flag_type
 {
     FLAG_TYPE_BOOL,
     FLAG_TYPE_STRING,
-    FLAG_TYPE_CUSTOM
+    FLAG_TYPE_CUSTOM,
+    FLAG_TYPE_FUNCTION
 } flag_type;
 
 typedef enum flag_pos
@@ -22,7 +23,8 @@ typedef struct flag
     flag_type type;
     flag_pos pos;
     uint8_t offset;
-    void (*process)(char *, void *);
+    void (*custom_func)(char *, void *);
+    void (*func)(void);
 } flag;
 
 extern flag map[];
