@@ -2,12 +2,12 @@
 A brainfuck AOT turning brainfuck code into GAS assembly.</br>
 ## Usage
 ```
-  brainfuck [flags] <source_file>
-  -h --help   print help message
-  -v --version   print version info
-  -p --tape <size>   change tape size
-  -t --target <arcitecture>   change target arcitecture for the output
-  -o --output <file_name>   declare the output file (default to a.s)
+brainfuck [flags] <source_file>
+-h --help   print help message
+-v --version   print version info
+-p --tape <size>   change tape size
+-t --target <arcitecture>   change target arcitecture for the output
+-o --output <file_name>   declare the output file (default to a.s)
 ```
 ### Supported arcitectures
 - linux x86_64 (x86_64_linux)
@@ -19,5 +19,5 @@ A brainfuck AOT turning brainfuck code into GAS assembly.</br>
 This code is released under the Apache License v2.0, see [LICENSE](/LICENSE)
 ## Contributors
 ```
-  irl-underscore https://github.com/irl-underscore
+irl-underscore https://github.com/irl-underscore
 ```
