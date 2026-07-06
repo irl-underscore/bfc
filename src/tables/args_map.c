@@ -75,19 +75,19 @@ void process_num(char *arg, void *mem)
 void print_help(void)
 {
     printf("brainfuck [flags] <source_file>\n");
-    printf("-h --help\tprint help message\n");
-    printf("-v --version\tprint version info\n");
-    printf("-p --tape <size>\tchange tape size\n");
+    printf("-h --help\t\t\tprint help message\n");
+    printf("-v --version\t\t\tprint version info\n");
+    printf("-p --tape <size>\t\tchange tape size (defaults to 1050)\n");
     printf("-t --target <arcitecture>\tchange target arcitecture (see below)\n");
-    printf("-o --output <file_name>\tdeclare output file (default to a.s)\n");
+    printf("-o --output <file_name>\tdeclare output file (defaults to a.s)\n");
     printf("supported arcitectures\n");
     printf("  linux x86_64 (x86_64_linux)\n");
 }
 
 void print_version(void)
 {
-    printf("barinfuck v%i.%i\n", VERSION_MAJOR, VERSION_MINOR);
-    printf("Copyright 2026 irl-underscore\n");
+    printf("\t\tbrainfuck v%i.%i\n", VERSION_MAJOR, VERSION_MINOR);
+    printf("\tCopyright 2026 irl-underscore\n");
     printf("Licensed under the Apache License Version 2.0\n");
 }
 

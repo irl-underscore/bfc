@@ -3,11 +3,11 @@ A brainfuck AOT compiler turning brainfuck code into GAS assembly.</br>
 ## Usage
 ```
 brainfuck [flags] <source_file>
--h --help   print help message
--v --version   print version info
--p --tape <size>   change tape size
+-h --help                   print help message
+-v --version                print version info
+-p --tape <size>            change tape size
 -t --target <arcitecture>   change target arcitecture
--o --output <file_name>   declare output file (default to a.s)
+-o --output <file_name>     declare output file (default to a.s)
 ```
 ### Supported arcitectures
 - linux x86_64 (x86_64_linux)
