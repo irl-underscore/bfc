@@ -87,7 +87,7 @@ flag map[] = {
     {'v', "version", FLAG_TYPE_FUNCTION, FLAG_POS_THIS, offsetof(compiler_options, version), NULL, print_version},
     {'p', "tape", FLAG_TYPE_CUSTOM, FLAG_POS_NEXT, offsetof(compiler_options, tape_size), process_num, NULL},
     {'t', "target", FLAG_TYPE_CUSTOM, FLAG_POS_NEXT, offsetof(compiler_options, target), process_target_arc, NULL},
-    {'o', NULL, FLAG_TYPE_STRING, FLAG_POS_NEXT, offsetof(compiler_options, output), NULL, NULL},
+    {'o', "output", FLAG_TYPE_STRING, FLAG_POS_NEXT, offsetof(compiler_options, output), NULL, NULL},
 };
 
 size_t map_len = sizeof(map);
