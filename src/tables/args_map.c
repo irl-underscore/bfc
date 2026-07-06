@@ -30,10 +30,10 @@
 
 void process_target_arc(char *arg, void *mem)
 {
-    if (strncmp(arg, "x86_64_linux", 30) == 0)
+    if (strncmp(arg, "x86_64_linux", 13) == 0)
     {
         write_data(mem, (arc_type*)ARC_X86_64_LINUX, sizeof(arc_type));
-    } else if (strncmp(arg, "x86_linux", 30) == 0)
+    } else if (strncmp(arg, "x86_linux", 10) == 0)
     {
         write_data(mem, (arc_type*)ARC_X86_LINUX, sizeof(arc_type));
     } else

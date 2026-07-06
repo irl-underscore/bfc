@@ -180,7 +180,7 @@ void process_args(char *argv[], int32_t argc, compiler_options *options)
         } else
         {
             size_t len = strnlen(arg, 15);
-            if (strncmp(arg + (len - 3), ".bf", 3) == 0)
+            if (strncmp(arg + (len - 3), ".bf", 4) == 0 ||strncmp(arg +(len - 2), ".b", 3) == 0)
             {
                 options->input = arg;
             }
