@@ -47,6 +47,7 @@ $(DEBUG_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(DEBUG_OBJ_DIR)
 	$(CC) $(CFLAGS) $(DBFLAGS) -c $< -o $@
 
 $(RELEASE_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(RELEASE_OBJ_DIR)
+	$(call MKDIR,$(dir $@))
 	$(CC) $(CFLAGS) $(RELFLAGS) -c $< -o $@
 
 $(DEBUG_DIR) $(RELEASE_DIR) $(DEBUG_OBJ_DIR) $(RELEASE_OBJ_DIR):
