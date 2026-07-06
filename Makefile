@@ -12,9 +12,10 @@ RWILDCARD = $(foreach d,$(wildcard $(1:=/*)),$(call RWILDCARD,$d,$2) $(filter $(
 
 MAJOR := 1
 MINOR := 0
+PATCH := 0
 
 CC := clang
-CFLAGS := -Wall -Wextra -std=c99 -MMD -DVERSION_MAJOR=$(MAJOR) -DVERSION_MINOR=$(MINOR)
+CFLAGS := -Wall -Wextra -std=c99 -MMD -DVERSION_MAJOR=$(MAJOR) -DVERSION_MINOR=$(MINOR) -DVERSION_PATCH=$(PATCH)
 RELFLAGS := -O3
 DBFLAGS := -g -DDEBUG=1
 
