@@ -18,17 +18,6 @@
 #define STRING_H
 #include <stdint.h>
 
-/*
- * So the string struct is build like this:
- * if initial_size = 3
- * the structure would look like this:
- * ['\0', '', '', '']
- * wich means that the acutal size of the string is
- * one bigger than the struct says.
- * So when I acess str->data[capacity] it returns NULL
- * and str->data[length] always returns '\0'
- */
-
 typedef struct string string;
 
 string *string_create(size_t initial_size);
