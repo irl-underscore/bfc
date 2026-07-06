@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 irl-underscore
+ * SPDX-License-Identifier: Apache-2.0
+ * This file is part of brainfuck and is licensed under the Apache 2.0 License.
+ */
+
 #include "dyn_string.h"
 #include "assembler.h"
 #include "stack.h"
@@ -8,18 +14,9 @@
 #include <string.h>
 #include <stdio.h>
 
-/*
- * Syscalls
- */
-
 static void emit_x86_linux(string *dst, bf_call call, char *arg0, char *arg1, char *arg2)
 {
-    int syscall = x86_linux_syscall_table[call] - 1;
-    if (syscall < 0)
-    {
-        // error handling
-        return;
-    }
+    uint8_t syscall = x86_linux_syscall_table[call] - 1;
     if (syscall == 0)
     {
         string_append_string(dst, "\txorl %eax, %eax\n");
@@ -51,13 +48,7 @@ static void emit_x86_linux(string *dst, bf_call call, char *arg0, char *arg1, ch
 
 static void emit_x86_64_linux(string *dst, bf_call call, char *arg0, char *arg1, char *arg2)
 {
-    int syscall = x86_64_linux_syscall_table[call] - 1;
-    if (syscall < 0)
-    {
-        // error handling
-        return;
-    }
-
+    uint8_t syscall = x86_64_linux_syscall_table[call] - 1;
     if (syscall == 0)
     {
         string_append_string(dst, "\txorq %rax, %rax\n");
@@ -97,10 +88,6 @@ static void emit_syscall(arc_type target, string *dst, bf_call call, char *arg0,
         case ARC_X86_64_LINUX: emit_x86_64_linux(dst, call, arg0, arg1, arg2); break;
     }
 }
-
-/*
- * Assemblage
- */
 
 static void emit_inc_op(arc_type type, string *dst, uint16_t count)
 {
