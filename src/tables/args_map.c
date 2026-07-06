@@ -74,12 +74,21 @@ void process_num(char *arg, void *mem)
 
 void print_help(void)
 {
-    printf("Still working on that one :)\n");
+    printf("brainfuck [flags] <source_file>\n");
+    printf("-h --help\tprint help message\n");
+    printf("-v --version\tprint version info\n");
+    printf("-p --tape <size>\tchange tape size\n");
+    printf("-t --target <arcitecture>\tchange target arcitecture (see below)\n");
+    printf("-o --output <file_name>\tdeclare output file (default to a.s)\n");
+    printf("supported arcitectures\n");
+    printf("  linux x86_64 (x86_64_linux)\n");
 }
 
 void print_version(void)
 {
-    printf("Not done yet :)\n");
+    printf("barinfuck v%i.%i\n", VERSION_MAJOR, VERSION_MINOR);
+    printf("Copyright 2026 irl-underscore\n");
+    printf("Licensed under the Apache License Version 2.0\n");
 }
 
 flag map[] = {

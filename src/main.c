@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define VERSION_MAJOR 1
+#define VERSION_MINOR 0
+
 #include "lexer.h"
 #include "assembler.h"
 #include "file.h"

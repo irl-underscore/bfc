@@ -10,8 +10,11 @@ endif
 
 RWILDCARD = $(foreach d,$(wildcard $(1:=/*)),$(call RWILDCARD,$d,$2) $(filter $(subst *,%,$2),$d))
 
+MAJOR := 1
+MINOR := 0
+
 CC := clang
-CFLAGS := -Wall -Wextra -std=c99 -MMD
+CFLAGS := -Wall -Wextra -std=c99 -MMD -DVERSION_MAJOR=$(MAJOR) -DVERSION_MINOR=$(MINOR)
 RELFLAGS := -O3
 DBFLAGS := -g -DDEBUG=1
 
