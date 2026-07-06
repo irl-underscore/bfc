@@ -16,6 +16,8 @@ brainfuck [flags] <source_file>
 > linux x86 is not fully supported yet.
 ## TODO
 - Complete x86_linux support and add support for arm_linux and arm64_linux
+- Add proper error system
+- Add table mangement for assembler
 ## License 
 This code is released under the Apache License v2.0, see [LICENSE](/LICENSE)
 ## Contributors
