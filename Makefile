@@ -34,7 +34,7 @@ PROJECT := brainfuck
 DEBUG := $(DEBUG_DIR)/$(PROJECT)
 RELEASE := $(RELEASE_DIR)/$(PROJECT)
 
-.PHONY: all clean rel run
+.PHONY: all clean rel run test
 
 all: $(DEBUG)
 
