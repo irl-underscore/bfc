@@ -3,7 +3,7 @@ _Short for brainfuck compiler._ </br>
 An brainfuck AOT compiler turning brainfuck code into GAS assembly.</br>
 ## Usage
 ```
-brainfuck [flags] <source_file>
+bfc [flags] <source_file>
 -h --help                   print help message
 -v --version                print version info
 -p --tape <size>            change tape size
