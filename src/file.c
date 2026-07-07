@@ -34,7 +34,6 @@ file_buf *file_buf_load(const char *in_path)
     fseek(in, 0, SEEK_END);
     long length = ftell(in);
     fseek(in, 0, SEEK_SET);
-
     if (length < 0) {
         fclose(in);
         return NULL;

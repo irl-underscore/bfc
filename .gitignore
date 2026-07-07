@@ -8,7 +8,3 @@
 
 # ...
 **/*.txt
-
-# Ognore test brainfuck files
-**/*.bf
-**/*.b
