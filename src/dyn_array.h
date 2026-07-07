@@ -17,6 +17,7 @@
 #ifndef DYN_ARRAY_H
 #define DYN_ARRAY_H
 #include <stdint.h>
+#include <stddef.h>
 
 typedef struct dyn_array dyn_array;
 

@@ -19,6 +19,7 @@
 #include "string.h"
 
 #include <string.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -83,7 +84,7 @@ static void iterate_arythmic(size_t *i, dyn_array *operations, dyn_array *dst, s
     {
         ir_operation op = {
             .type = (count < 0) ? IR_DEC : IR_INC,
-            .count = _abs64(count)
+            .count = llabs(count)
         };
 
         dyn_array_restrict_insert_end(dst, &op);
@@ -106,7 +107,7 @@ static void iterate_shift(size_t *i, dyn_array *operations, dyn_array *dst, size
     {
         ir_operation op = {
             .type = (count < 0) ? IR_LSHIFT : IR_RSHIFT,
-            .count = _abs64(count)
+            .count = llabs(count)
         };
 
         dyn_array_restrict_insert_end(dst, &op);
