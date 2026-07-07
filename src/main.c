@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
         if (!buf) return 1;
 
         dyn_array *operations = parse_file(buf);
+        if (!operations) return 1;
+
         file_buf_destroy(buf);
         dyn_array *optimized = post_process(operations);
         assemble_ctx *ctx = ctx_init(opt.tape_size);

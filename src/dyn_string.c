@@ -90,8 +90,6 @@ void string_append_format(string *str, const char *format, ...)
     va_start(args, format);
     size_t len = vsnprintf(NULL, 0, format, args);
     va_end(args);
-    if (len < 0) return;
-
     size_t target_len = str->length + len;
     if (target_len > str->capacity) string_realloc(str, target_len);
 

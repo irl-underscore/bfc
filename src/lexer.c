@@ -45,6 +45,7 @@ dyn_array *parse_file(file_buf *buf)
     dyn_array *operations = dyn_array_create(200, sizeof(ir_operation));
     char *data = buf->data;
     char *end = buf->data + buf->size;
+    uint32_t loop_count = 0;
     while (*data != '\0' || data < end)
     {
         ir_type type = get_type(*data);
@@ -57,7 +58,22 @@ dyn_array *parse_file(file_buf *buf)
 
             dyn_array_restrict_insert_end(operations, &op);
         }
+
+        if (type == IR_LLOOP)
+        {
+            loop_count++;
+        } else if (type == IR_RLOOP)
+        {
+            loop_count--;
+        }
+
         data++;
+    }
+
+    if (loop_count != 0)
+    {
+        fprintf(stderr, "Error: %u unmatched loop brackets\n", loop_count);
+        return NULL;
     }
 
     ir_operation end_op = {
