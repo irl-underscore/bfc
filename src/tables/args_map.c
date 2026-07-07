@@ -86,7 +86,7 @@ void print_help(void)
 
 void print_version(void)
 {
-    printf("\t\tbrainfuck v%i.%i.%i\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+    printf("\t\t%s v%i.%i.%i\n", PROJECT, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
     printf("\tCopyright 2026 irl-underscore\n");
     printf("Licensed under the Apache License Version 2.0\n");
 }

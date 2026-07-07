@@ -13,9 +13,10 @@ RWILDCARD = $(foreach d,$(wildcard $(1:=/*)),$(call RWILDCARD,$d,$2) $(filter $(
 MAJOR := 1
 MINOR := 0
 PATCH := 0
+PROJECT := bfc
 
 CC := clang
-CFLAGS := -Wall -Wextra -std=c99 -MMD -DVERSION_MAJOR=$(MAJOR) -DVERSION_MINOR=$(MINOR) -DVERSION_PATCH=$(PATCH)
+CFLAGS := -Wall -Wextra -std=c99 -MMD -DVERSION_MAJOR=$(MAJOR) -DVERSION_MINOR=$(MINOR) -DVERSION_PATCH=$(PATCH) -DPROJECT=\"$(PROJECT)\"
 RELFLAGS := -O3
 DBFLAGS := -g -DDEBUG=1
 
@@ -29,7 +30,6 @@ SRC_DIR := src
 SRCS := $(call RWILDCARD,$(SRC_DIR),*.c)
 DEBUG_OBJS := $(patsubst $(SRC_DIR)/%.c, $(DEBUG_OBJ_DIR)/%.o, $(SRCS))
 RELEASE_OBJS := $(patsubst $(SRC_DIR)/%.c, $(RELEASE_OBJ_DIR)/%.o, $(SRCS))
-PROJECT := brainfuck
 
 DEBUG := $(DEBUG_DIR)/$(PROJECT)
 RELEASE := $(RELEASE_DIR)/$(PROJECT)

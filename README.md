@@ -1,4 +1,5 @@
-# Brainfuck
+# bfc
+_Short for brainfuck compiler._ </br>
 A brainfuck AOT compiler turning brainfuck code into GAS assembly.</br>
 ## Usage
 ```
