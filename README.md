@@ -19,6 +19,7 @@ brainfuck [flags] <source_file>
 - Add proper error system
 - Add table mangement for assembler
 - Add testing
+- Add consistent and readable naming
 ## License 
 This code is released under the Apache License v2.0, see [LICENSE](/LICENSE)
 ## Contributors
