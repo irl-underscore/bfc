@@ -14,35 +14,13 @@
  * limitations under the License.
  */
 
-#define VERSION_MAJOR 1
-#define VERSION_MINOR 0
-
-#include "assembler.h"
+#ifndef BRAINFUCK_H
+#define BRAINFUCK_H
 #include "args.h"
-#include "error.h"
-#include "brainfuck.h"
 
-#include <stdlib.h>
+#define DEFAULT_TAPE_SIZE 1050
+#define DEFAULT_OUTPUT "a.s"
 
-compiler_options opt = {
-    .help = 0,
-    .version = 0,
-    .tape_size = 1050,
-    .target = ARC_X86_64_LINUX,
-    .output = "a.s",
-    .input = NULL,
-};
+res process(compiler_options defaults, char *argv[], uint32_t argc);
 
-
-int main(int argc, char *argv[])
-{
-    init_diags();
-    res r = process(opt, argv, argc);
-    if (r != OK)
-    {
-        throw_errs();
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
-}
+#endif /* BRAINFUCK_H */
