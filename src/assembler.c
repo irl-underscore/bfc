@@ -20,7 +20,6 @@
 #include "sys.c"
 
 #include <stdlib.h>
-#include <string.h>
 
 struct assemble_ctx
 {
@@ -46,7 +45,6 @@ assemble_ctx *ctx_init(uint32_t tape_size)
     string_append_string(ctx->text, ".section .text\n");
     string_append_string(ctx->text, ".global _start\n");
     string_append_string(ctx->text, "_start:\n");
-    string_append_string(ctx->text, "\txorq %rcx, %rcx\n");
 
     ctx->data = string_create(50);
     string_append_string(ctx->data, ".section .data\n");
@@ -54,18 +52,20 @@ assemble_ctx *ctx_init(uint32_t tape_size)
     return ctx;
 }
 
-void ctx_process(assemble_ctx *ctx, dyn_array *operations, arc_type type)
+res ctx_process(assemble_ctx *ctx, dyn_array *operations, arc_type type)
 {
-    if (!ctx || !operations) return;
-
     emit_tape_reg_init(ctx->text, type);
-    process_intructions(type, ctx->text, operations);
+    return process_intructions(type, ctx->text, operations);
 }
 
 char *ctx_assemble(assemble_ctx *ctx)
 {
     string *code = string_create(250);
-    if (!code) return NULL;
+    if (!code)
+    {
+        emit_err("Unable to allocate memory", NULL, 0, 0, G2001, ERROR);
+        return NULL;
+    }
 
     if (ctx->use_data) string_append_string(code, string_get_raw(ctx->data));
 
@@ -76,8 +76,6 @@ char *ctx_assemble(assemble_ctx *ctx)
 
 void ctx_destroy(assemble_ctx *ctx)
 {
-    if (!ctx) return;
-
     string_destroy(ctx->bss);
     string_destroy(ctx->text);
     string_destroy(ctx->data);

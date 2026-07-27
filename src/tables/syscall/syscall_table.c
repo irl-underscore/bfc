@@ -14,22 +14,9 @@
  * limitations under the License.
  */
 
-#ifndef ASSEMBLER_H
-#define ASSEMBLER_H
-#include "dyn_array.h"
-#include "error.h"
+#include "syscall_tables.h"
 
-typedef enum
-{
-    ARC_X86_LINUX = 0,
-    ARC_X86_64_LINUX = 1
-} arc_type;
-
-typedef struct assemble_ctx assemble_ctx;
-
-assemble_ctx *ctx_init(uint32_t tape_size);
-res ctx_process(assemble_ctx *ctx, dyn_array *instructions, arc_type type);
-char *ctx_assemble(assemble_ctx *ctx);
-void ctx_destroy(assemble_ctx *ctx);
-
-#endif /* ASSEMBLER_H  */
+const int64_t *syscall_table[] = {
+    x86_linux_syscall_table,
+    x86_64_linux_syscall_table
+};

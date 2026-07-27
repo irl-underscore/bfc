@@ -25,7 +25,8 @@ typedef enum
     BF_CALL_WRITE = 2
 } bf_call;
 
-extern int64_t x86_64_linux_syscall_table[];
-extern int64_t x86_linux_syscall_table[];
+extern const int64_t x86_64_linux_syscall_table[];
+extern const int64_t x86_linux_syscall_table[];
+extern const int64_t *syscall_table[];
 
 #endif /* SYSCALL_TABLES_H */
