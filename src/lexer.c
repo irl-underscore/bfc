@@ -22,22 +22,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static ir_type get_type(char c)
-{
-    switch (c)
-    {
-        case '+': return IR_INC;
-        case '-': return IR_DEC;
-        case '<': return IR_LSHIFT;
-        case '>': return IR_RSHIFT;
-        case ',': return IR_IN;
-        case '.': return IR_OUT;
-        case '[': return IR_LLOOP;
-        case ']': return IR_RLOOP;
-        default: return 10;
-    }
-}
-
 dyn_array *parse_file(file_buf *buf)
 {
     if (!buf) return NULL;
@@ -45,10 +29,9 @@ dyn_array *parse_file(file_buf *buf)
     dyn_array *operations = dyn_array_create(200, sizeof(ir_operation));
     char *data = buf->data;
     char *end = buf->data + buf->size;
-    uint32_t loop_count = 0;
     while (*data != '\0' || data < end)
     {
-        ir_type type = get_type(*data);
+        ir_type type = ir_operation_map[(uint8_t)*data].type;
         if (type != 10)
         {
             ir_operation op = {
@@ -59,21 +42,7 @@ dyn_array *parse_file(file_buf *buf)
             dyn_array_restrict_insert_end(operations, &op);
         }
 
-        if (type == IR_LLOOP)
-        {
-            loop_count++;
-        } else if (type == IR_RLOOP)
-        {
-            loop_count--;
-        }
-
         data++;
-    }
-
-    if (loop_count != 0)
-    {
-        fprintf(stderr, "Error: %u unmatched loop brackets\n", loop_count);
-        return NULL;
     }
 
     ir_operation end_op = {

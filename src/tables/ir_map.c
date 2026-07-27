@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef LEXER_H
-#define LEXER_H
-#include "tables/ir_map.h"
-#include "dyn_array.h"
-#include "file.h"
+#include "ir_map.h"
 
-#include <stdint.h>
+#include <stddef.h>
 
-typedef struct ir_operation
-{
-    ir_type type;
-    uint16_t count;
-} ir_operation;
+#define OP(c, type, match) [c] = {c, type, match},
 
-dyn_array *parse_file(file_buf *buf);
-dyn_array *post_process(dyn_array *operations);
+const ir_def_op ir_operation_map[] = {
+    OP('+', IR_INC, 0)
+    OP('-', IR_DEC, 0)
+    OP('>', IR_RSHIFT, 0)
+    OP('<', IR_LSHIFT, 0)
+    OP('[', IR_LLOOP, IR_RLOOP)
+    OP(']', IR_RLOOP, 0)
+    OP('.', IR_OUT, 0)
+    OP(',', IR_IN, 0)
+};
 
-#endif /* LEXER_H */
+#undef OP

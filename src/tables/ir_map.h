@@ -14,21 +14,33 @@
  * limitations under the License.
  */
 
-#ifndef LEXER_H
-#define LEXER_H
-#include "tables/ir_map.h"
-#include "dyn_array.h"
-#include "file.h"
+#ifndef IR_MAP_H
+#define IR_MAP_H
 
 #include <stdint.h>
 
-typedef struct ir_operation
+typedef enum ir_type
 {
+    IR_NOP,
+    IR_INC,
+    IR_DEC,
+    IR_CLEAR,
+    IR_RSHIFT,
+    IR_LSHIFT,
+    IR_OUT,
+    IR_IN,
+    IR_LLOOP,
+    IR_RLOOP,
+    IR_END
+} ir_type;
+
+typedef struct ir_def_op
+{
+    char sign;
     ir_type type;
-    uint16_t count;
-} ir_operation;
+    ir_type match;
+} ir_def_op;
 
-dyn_array *parse_file(file_buf *buf);
-dyn_array *post_process(dyn_array *operations);
+extern const ir_def_op ir_operation_map[];
 
-#endif /* LEXER_H */
+#endif /* IR_MAP_H */
