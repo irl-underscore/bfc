@@ -1,0 +1,17 @@
+// X(prefix, num, name)
+/* types
+ * G: genral:
+ *      1: file error
+ *      2: argument error
+ *      3: memory error
+ * L: lexer:
+ *      1: syntax error
+ * A: assembler:
+ *
+ */
+X(G, 1001, "Unable to locate target file '%file'")
+X(G, 1002, "Unable to read from file '%file'")
+X(G, 2001, "Flag is missing parameter")
+X(G, 2002, "Unkown arcitecute type '%file'")
+X(G, 2003, "Non number in arg")
+X(G, 3001, "Unable to allocate memory")
