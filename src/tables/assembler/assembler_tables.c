@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef REGISTER_TABLES_H
-#define REGISTER_TABLES_H
+#include "assembler_tables.h"
 
-typedef enum reg_type
+const char **assembler_table[] =
 {
-    ASM_REG_TAPE_BASE,
-    ASM_REG_COUNT,
-    ASM_REG_PRINT_BUF,
-    ASM_REG_BYTE_BUFFER,
-    ASM_REG_CALL,
-    ASM_REG_PARAM0,
-    ASM_REG_PARAM1,
-    ASM_REG_PARAM2
-} reg_type;
-
-extern const char *x86_64_linux_register_table[];
-extern const char *x86_linux_register_table[];
-extern const char **register_table[];
-
-#endif /* REGISTER_TABLES_H */
+    x86_linux_assembler_table,
+    x86_64_linux_assembler_table
+};

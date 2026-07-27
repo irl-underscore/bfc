@@ -21,7 +21,7 @@
 #include "error.h"
 
 #include "tables/syscall/syscall_tables.h"
-#include "tables/registers/register_tables.h"
+#include "tables/assembler/assembler_tables.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -29,56 +29,58 @@
 static void emit_syscall(arc_type target, string *dst, bf_call call, char *arg0, char *arg1, char *arg2)
 {
     const int64_t syscall = syscall_table[target][call] - 1;
-    const char **registers = register_table[target];
-    if (syscall == 0) string_append_format(dst, "\txorl %%%s, %%%s\n", registers[ASM_REG_CALL], registers[ASM_REG_CALL]);
-    else string_append_format(dst, "\tmovl $%i, %%%s\n", syscall, registers[ASM_REG_CALL]);
+    const char **asms = assembler_table[target];
+    if (syscall == 0) string_append_format(dst, "\txor%s %%%s, %%%s\n", asms[ASM_EXT_MAX_LEN], asms[ASM_REG_CALL], asms[ASM_REG_CALL]);
+    else string_append_format(dst, "\tmov%s $%i, %%%s\n", asms[ASM_EXT_MAX_LEN], syscall, asms[ASM_REG_CALL]);
 
     #define EMIT_ARG(arg_num) \
     if (!arg ## arg_num) return; \
-    if (strncmp(arg ## arg_num, "$0", 3) == 0) string_append_format(dst, "\txorl %%%s, %%%s", registers[ASM_REG_PARAM ## arg_num], registers[ASM_REG_PARAM ## arg_num]); \
-    else string_append_format(dst, "\tmovl %s, %%%s\n", arg ## arg_num, registers[ASM_REG_PARAM ## arg_num]); \
+    if (strncmp(arg ## arg_num, "$0", 3) == 0) string_append_format(dst, "\txor%s %%%s, %%%s", asms[ASM_EXT_MAX_LEN], asms[ASM_REG_PARAM ## arg_num], asms[ASM_REG_PARAM ## arg_num]); \
+    else string_append_format(dst, "\tmov%s %s, %%%s\n", asms[ASM_EXT_MAX_LEN], arg ## arg_num, asms[ASM_REG_PARAM ## arg_num]); \
 
     EMIT_ARG(0)
     EMIT_ARG(1)
     EMIT_ARG(2)
 
     #undef EMIT_ARG
+
+    string_append_format(dst, "\t%s\n", asms[ASM_SYSCALL]);
 }
 
 static void emit_inc_op(arc_type type, string *dst, uint16_t count)
 {
-    if (count == 1) string_append_format(dst, "\tincb (%%%s)\n", register_table[type][ASM_REG_TAPE_BASE]);
-    else if (count > 1) string_append_format(dst, "\taddb $%u, (%%%s)\n", count, register_table[type][ASM_REG_TAPE_BASE]);
+    if (count == 1) string_append_format(dst, "\tinc%s (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE]);
+    else if (count > 1) string_append_format(dst, "\tadd%s $%u, (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], count, assembler_table[type][ASM_REG_TAPE_BASE]);
 }
 
 static void emit_dec_op(arc_type type, string *dst, uint16_t count)
 {
-    if (count == 1) string_append_format(dst, "\tdecb (%%%s)\n", register_table[type][ASM_REG_TAPE_BASE]);
-    else if (count > 1) string_append_format(dst, "\tsubb $%u, (%%%s)\n", count, register_table[type][ASM_REG_TAPE_BASE]);
+    if (count == 1) string_append_format(dst, "\tdec%s (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE]);
+    else if (count > 1) string_append_format(dst, "\tsub%s $%u, (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], count, assembler_table[type][ASM_REG_TAPE_BASE]);
 }
 
 static void emit_clear_op(arc_type type, string *dst)
 {
-    string_append_format(dst, "\txorq %%%s, %%%s\n", register_table[type][ASM_REG_TAPE_BASE], register_table[type][ASM_REG_TAPE_BASE]);
+    string_append_format(dst, "\txor%s %%%s, %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_TAPE_BASE], assembler_table[type][ASM_REG_TAPE_BASE]);
 }
 
 static void emit_lshift_op(arc_type type, string *dst, uint16_t count)
 {
-    if (count == 1) string_append_format(dst, "\tdecl %%%s\n", register_table[type][ASM_REG_TAPE_BASE]);
-    else if (count > 1) string_append_format(dst, "\tsubl $%u, %%%s\n", count, register_table[type][ASM_REG_TAPE_BASE]);
+    if (count == 1) string_append_format(dst, "\tdec%s %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_TAPE_BASE]);
+    else if (count > 1) string_append_format(dst, "\tsub%s $%u, %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], count, assembler_table[type][ASM_REG_TAPE_BASE]);
 }
 
 static void emit_rshift_op(arc_type type, string *dst, uint16_t count)
 {
-    if (count == 1) string_append_format(dst, "\tincq %%%s\n", register_table[type][ASM_REG_TAPE_BASE]);
-    else if (count > 1) string_append_format(dst, "\taddq $%u, %%%s\n", count, register_table[type][ASM_REG_TAPE_BASE]);
+    if (count == 1) string_append_format(dst, "\tinc%s %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_TAPE_BASE]);
+    else if (count > 1) string_append_format(dst, "\tadd%s $%u, %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], count, assembler_table[type][ASM_REG_TAPE_BASE]);
 }
 
 static void emit_loop_start(arc_type type, string *dst, uint16_t *loop_count, stack *loop_stack)
 {
     string_append_format(dst, ".L%u_start:\n", ++(*loop_count));
     push(loop_stack, *loop_count);
-    string_append_format(dst, "\tcmpb $0, (%%%s)\n", register_table[type][ASM_REG_TAPE_BASE]);
+    string_append_format(dst, "\tcmp%s $0, (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE]);
     string_append_format(dst, "\tje .L%u_end\n", *loop_count);
 }
 
@@ -96,17 +98,17 @@ static void emit_flush(arc_type type, string *dst, uint16_t *outs)
     char count_str[7];
     sprintf(count_str, "$%u", *outs);
     char print_buf[5];
-    sprintf(print_buf, "%%%s", register_table[type][ASM_REG_TAPE_BASE]);
+    sprintf(print_buf, "%%%s", assembler_table[type][ASM_REG_TAPE_BASE]);
     emit_syscall(type, dst, BF_CALL_WRITE, "$1", print_buf, count_str);
     *outs = 0;
-    string_append_format(dst, "\txorq %%%s, %%%s\n", register_table[type][ASM_REG_COUNT], register_table[type][ASM_REG_COUNT]);
+    string_append_format(dst, "\txor%s %%%s, %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_COUNT], assembler_table[type][ASM_REG_COUNT]);
 }
 
 static void emit_out_op(arc_type type, string *dst, uint16_t *outs)
 {
-    string_append_format(dst, "\tmovb (%%%s), %%%s\n", register_table[type][ASM_REG_TAPE_BASE], register_table[type][ASM_REG_BYTE_BUFFER]);
-    string_append_format(dst, "\tmovb %%%s, (%%%s, %%%s, 1)\n", register_table[type][ASM_REG_BYTE_BUFFER], register_table[type][ASM_REG_PRINT_BUF], register_table[type][ASM_REG_COUNT]);
-    string_append_format(dst, "\tincq %%%s\n", register_table[type][ASM_REG_COUNT]);
+    string_append_format(dst, "\tmov%s (%%%s), %%%s\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE], assembler_table[type][ASM_REG_BYTE_BUFFER]);
+    string_append_format(dst, "\tmov%s %%%s, (%%%s, %%%s, 1)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_BYTE_BUFFER], assembler_table[type][ASM_REG_PRINT_BUF], assembler_table[type][ASM_REG_COUNT]);
+    string_append_format(dst, "\tinc%s %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_COUNT]);
     (*outs)++;
     if (*outs == 20)
     {
@@ -122,7 +124,7 @@ static void emit_in_op(arc_type type, string *dst, uint16_t *outs)
     }
 
     char base_reg[7];
-    sprintf(base_reg, "(%%%s)", register_table[type][ASM_REG_TAPE_BASE]);
+    sprintf(base_reg, "(%%%s)", assembler_table[type][ASM_REG_TAPE_BASE]);
     emit_syscall(type, dst, BF_CALL_READ, "$0", base_reg, "$1");
 }
 
@@ -138,7 +140,7 @@ static res process_intructions(arc_type type, string *dst, dyn_array *operations
     }
 
     size_t arr_size = dyn_array_get_size(operations);
-    string_append_format(dst, "\txorl %%%s, %%%s\n", register_table[type][ASM_REG_COUNT], register_table[type][ASM_REG_COUNT]);
+    string_append_format(dst, "\txor%s %%%s, %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_COUNT], assembler_table[type][ASM_REG_COUNT]);
     for (size_t i = 0; i < arr_size; i++)
     {
         ir_operation op = *(ir_operation*)dyn_array_get(operations, i);
@@ -163,5 +165,5 @@ static res process_intructions(arc_type type, string *dst, dyn_array *operations
 
 static void emit_tape_reg_init(string *text, arc_type type)
 {
-    string_append_format(text, "\tlea tape(%%rip), %%%s\n", register_table[type][ASM_REG_TAPE_BASE]); string_append_format(text, "\tlea print_buf(%%rip), %%%s\n", register_table[type][ASM_REG_TAPE_BASE]);
+    string_append_format(text, "\tlea tape(%%rip), %%%s\n", assembler_table[type][ASM_REG_TAPE_BASE]); string_append_format(text, "\tlea print_buf(%%rip), %%%s\n", assembler_table[type][ASM_REG_TAPE_BASE]);
 }

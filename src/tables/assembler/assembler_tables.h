@@ -14,13 +14,26 @@
  * limitations under the License.
  */
 
-#include "register_tables.h"
+#ifndef ASSEMBLER_TABLES_H
+#define ASSEMBLER_TABLES_H
 
-#define _MATCH_X86_LINUX(reg_str) = reg_str
-#include "register_start.h"
+typedef enum reg_type
+{
+    ASM_REG_TAPE_BASE,
+    ASM_REG_COUNT,
+    ASM_REG_PRINT_BUF,
+    ASM_REG_BYTE_BUFFER,
+    ASM_REG_CALL,
+    ASM_REG_PARAM0,
+    ASM_REG_PARAM1,
+    ASM_REG_PARAM2,
+    ASM_SYSCALL,
+    ASM_EXT_MAX_LEN,
+    ASM_EXT_BYTE
+} reg_type;
 
-const char *x86_linux_register_table[] = {
-    #include "register_map.def"
-};
+extern const char *x86_64_linux_assembler_table[];
+extern const char *x86_linux_assembler_table[];
+extern const char **assembler_table[];
 
-#include "register_end.h"
+#endif /* ASSEMBLER_TABLES_H */

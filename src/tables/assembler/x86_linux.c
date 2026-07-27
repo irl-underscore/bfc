@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-#include "register_tables.h"
+#include "assembler_tables.h"
 
-const char **register_table[] =
-{
-    x86_linux_register_table,
-    x86_64_linux_register_table
+#define _MATCH_X86_LINUX(reg_str) = reg_str
+#include "assembler_start.h"
+
+const char *x86_linux_assembler_table[] = {
+    #include "assembler_map.def"
 };
+
+#include "assembler_end.h"
