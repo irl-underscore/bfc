@@ -110,10 +110,7 @@ static void emit_out_op(arc_type type, string *dst, uint16_t *outs)
     string_append_format(dst, "\tmov%s %%%s, (%%%s, %%%s, 1)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_BYTE_BUFFER], assembler_table[type][ASM_REG_PRINT_BUF], assembler_table[type][ASM_REG_COUNT]);
     string_append_format(dst, "\tinc%s %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_COUNT]);
     (*outs)++;
-    if (*outs == 20)
-    {
-        emit_flush(type, dst, outs);
-    }
+    if (*outs == 20) emit_flush(type, dst, outs);
 }
 
 static void emit_in_op(arc_type type, string *dst, uint16_t *outs)
