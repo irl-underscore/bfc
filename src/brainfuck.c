@@ -34,38 +34,30 @@ res process(compiler_options defaults, char *argv[], uint32_t argc)
     res r = OK;
     res args = process_args(argv, argc, &opts);
     ASSERT_TO(args == OK, end)
-    printf("yo\n");
 
     if (!opts.input) return OK;
 
     file_buf *buf = file_buf_load(opts.input);
     ASSERT_TO(buf, end)
-    printf("yo\n");
 
     dyn_array *operations = parse_file(buf);
     ASSERT_TO(operations, destroy_file_buf)
-    printf("yo\n");
 
     dyn_array *temp = post_process(operations);
     ASSERT_TO(temp, destroy_operations)
 
-    printf("yo\n");
     operations = temp;
     assemble_ctx *ctx = ctx_init(opts.tape_size);
     ASSERT_TO(ctx, destroy_operations)
-    printf("yo\n");
 
     res process = ctx_process(ctx, operations, opts.target);
     ASSERT_TO(process == OK, destroy_ctx)
-    printf("yo\n");
 
     char *code = ctx_assemble(ctx);
     ASSERT_TO(code, destroy_ctx)
-    printf("yo\n");
 
     res pitch = pitch_code(code, opts.output);
     ASSERT_TO(pitch == OK, destroy_code)
-    printf("yo\n");
 
     destroy_code:
     free(code);

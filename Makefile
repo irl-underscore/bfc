@@ -16,6 +16,7 @@ PATCH := 2
 PROJECT := bfc
 
 CC ?= clang
+STRIP := strip
 CFLAGS := -Wall -Wextra -std=gnu99 -MMD -DVERSION_MAJOR=$(MAJOR) -DVERSION_MINOR=$(MINOR) -DVERSION_PATCH=$(PATCH) -DPROJECT=\"$(PROJECT)\"
 RELFLAGS := -O3
 DBFLAGS := -g -DDEBUG=1
@@ -45,6 +46,7 @@ $(DEBUG): $(DEBUG_OBJS) | $(DEBUG_DIR)
 
 rel: $(RELEASE_OBJS) | $(RELEASE_DIR)
 	$(CC) $(CFLAGS) $(RELFLAGS) $^ -o $(RELEASE)
+	$(STRIP) $(RELEASE)$(EXE)
 
 $(DEBUG_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(DEBUG_OBJ_DIR)
 	$(call MKDIR,$(dir $@))
