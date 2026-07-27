@@ -11,8 +11,8 @@ endif
 RWILDCARD = $(foreach d,$(wildcard $(1:=/*)),$(call RWILDCARD,$d,$2) $(filter $(subst *,%,$2),$d))
 
 MAJOR := 1
-MINOR := 0
-PATCH := 0
+MINOR := 1
+PATCH := 2
 PROJECT := bfc
 
 CC ?= clang
@@ -37,6 +37,8 @@ RELEASE := $(RELEASE_DIR)/$(PROJECT)
 .PHONY: all clean rel run test
 
 all: $(DEBUG)
+
+re: clean $(DEBUG)
 
 $(DEBUG): $(DEBUG_OBJS) | $(DEBUG_DIR)
 	$(CC) $(CFLAGS) $(DBFLAGS) $^ -o $@

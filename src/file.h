@@ -17,6 +17,7 @@
 #ifndef FILE_H
 #define FILE_H
 #include "dyn_array.h"
+#include "error.h"
 
 #include <stdint.h>
 
@@ -28,6 +29,6 @@ typedef struct file_buf
 
 file_buf *file_buf_load(const char *path);
 void file_buf_destroy(file_buf *buf);
-void pitch_code(const char *code, const char *output_file);
+res pitch_code(const char *code, const char *output_file);
 
 #endif

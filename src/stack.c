@@ -42,7 +42,7 @@ void push(stack *stk, uint32_t val)
 
 uint32_t pop(stack *stk)
 {
-    if (!stk ||stk->top == 0) return 0;
+    if (!stk ||stk->top == 0) return (-1);
 
     return stk->vals[--stk->top];
 }
