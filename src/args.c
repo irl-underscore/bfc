@@ -25,6 +25,10 @@
 #include <stdalign.h>
 
 #define MAX_CUSTOM_FLAG_MEMORY 32
+#define MAX_SRC_FILE_LEN 64
+#define MAX_LONG_FLAG_LEN 10
+
+#define ARGS_FAILURE 255
 
 #define ALIGN_UP(align, addr) ((addr + (align - 1)) & ~(align - 1))
 
@@ -42,18 +46,30 @@ static uint8_t get_size(void *mem)
     return size;
 }
 
+static uint8_t get_err(void *mem)
+{
+    uint8_t err;
+    memcpy(&err, (byte*)mem + 2, 1);
+    return err;
+}
+
 void write_data(void *mem, void *data, uint8_t obj_size)
 {
-    if (!mem) return;
-
     uintptr_t mem_addr = (uintptr_t)mem;
-    uintptr_t aligned_mem = ALIGN_UP(8, mem_addr + 2);
+    uintptr_t aligned_mem = ALIGN_UP(8, mem_addr + 3);
     uint8_t offset = aligned_mem - mem_addr;
     memset(mem, obj_size, 1);
     memset((byte*)mem + 1, offset, 1);
-    mem = (byte*)mem + 2 + offset;
+    uint8_t ok = 0;
+    memset((byte*)mem + 2, ok, 1);
+    mem = (byte*)mem + 3 + offset;
     memcpy(mem, data, MAX_CUSTOM_FLAG_MEMORY - offset);
+}
 
+void write_err(void *mem)
+{
+    uint8_t err = 0xFF;
+    memset((byte*)mem + 2, err, 1);
 }
 
 static uint8_t execute_flag(flag f, compiler_options *options, char *this, char *next, void *mem)
@@ -77,7 +93,8 @@ static uint8_t execute_flag(flag f, compiler_options *options, char *this, char 
                 *(char**)((byte*)options + f.offset) = this;
             } else
             {
-                fprintf(stderr, "Error: Flag is missing parameter\n");
+                emit_err(NULL, NULL, 0, 0, G2001, ERROR);
+                return ARGS_FAILURE;
             }
 
             break;
@@ -93,11 +110,17 @@ static uint8_t execute_flag(flag f, compiler_options *options, char *this, char 
                 f.custom_func(this, mem);
             }
 
+            uint8_t err = get_err(mem);
+            if (err == 0xFF)
+            {
+                return ARGS_FAILURE;
+            }
+
             uint8_t size = get_size(mem);
             uint8_t offset = get_offset(mem);
-            mem = (byte*)mem + 2 + offset;
+            mem = (byte*)mem + 3 + offset;
             memcpy((byte*)options + f.offset, mem, size); break;
-            memset(mem, 0, 2 + MAX_CUSTOM_FLAG_MEMORY);
+            memset(mem, 0, 3 + MAX_CUSTOM_FLAG_MEMORY);
             break;
         }
 
@@ -137,7 +160,7 @@ static uint8_t check_long(char *argv[], int32_t argc, compiler_options *options,
     uint8_t res = 1;
     if (map[*i].long_form)
     {
-        size_t flag_len = strnlen(map[*i].long_form, 10);
+        size_t flag_len = strnlen(map[*i].long_form, MAX_LONG_FLAG_LEN);
         if (map[*i].long_form && strncmp(arg, map[*i].long_form, flag_len) == 0)
         {
             res = execute_flag(map[*i], options, arg + flag_len, argv[current_idx + 1], mem);
@@ -161,12 +184,18 @@ static uint8_t check_long(char *argv[], int32_t argc, compiler_options *options,
     else goto ret;
 }
 
-void process_args(char *argv[], int32_t argc, compiler_options *options)
+res process_args(char *argv[], int32_t argc, compiler_options *options)
 {
     size_t i = 0;
     int32_t current_idx = 1;
-    void *mem = malloc(2 + MAX_CUSTOM_FLAG_MEMORY);
-    memset(mem, 0, 2 + MAX_CUSTOM_FLAG_MEMORY);
+    void *mem = malloc(3 + MAX_CUSTOM_FLAG_MEMORY);
+    if (!mem)
+    {
+        emit_err(NULL, NULL, 0, 0, G3001, ERROR);
+        return ERR;
+    }
+
+    memset(mem, 0, 3 + MAX_CUSTOM_FLAG_MEMORY);
     while (1)
     {
         uint8_t increment = 1;
@@ -179,7 +208,7 @@ void process_args(char *argv[], int32_t argc, compiler_options *options)
             increment = check_short(argv, argc, options, &i, current_idx, mem);
         } else
         {
-            size_t len = strnlen(arg, 15);
+            size_t len = strnlen(arg, MAX_SRC_FILE_LEN);
             if (strncmp(arg + (len - 3), ".bf", 4) == 0 ||strncmp(arg +(len - 2), ".b", 3) == 0)
             {
                 options->input = arg;
@@ -188,8 +217,15 @@ void process_args(char *argv[], int32_t argc, compiler_options *options)
 
         if (i >= map_len)
         {
-            fprintf(stderr, "Error: Unkown flag: %s\n", arg);
-            break;
+            emit_err(NULL, NULL, 0, 0, G2001, ERROR);
+            free(mem);
+            return ERR;
+        }
+
+        if (increment == ARGS_FAILURE)
+        {
+            free(mem);
+            return ERR;
         }
 
         current_idx += increment;
@@ -197,4 +233,5 @@ void process_args(char *argv[], int32_t argc, compiler_options *options)
     }
 
     free(mem);
+    return OK;
 }

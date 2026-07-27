@@ -32,13 +32,16 @@ void process_target_arc(char *arg, void *mem)
 {
     if (strncmp(arg, "x86_64_linux", 13) == 0)
     {
-        write_data(mem, (arc_type*)ARC_X86_64_LINUX, sizeof(arc_type));
+        arc_type x86_64 = ARC_X86_64_LINUX;
+        write_data(mem, &x86_64, sizeof(arc_type));
     } else if (strncmp(arg, "x86_linux", 10) == 0)
     {
-        write_data(mem, (arc_type*)ARC_X86_LINUX, sizeof(arc_type));
+        arc_type x86 = ARC_X86_LINUX;
+        write_data(mem, &x86, sizeof(arc_type));
     } else
     {
-        fprintf(stderr, "Error: Unkown arcitecture: '%s'\n", arg);
+        emit_err(NULL, NULL, 0, 0, G2002, ERROR);
+        write_err(mem);
     }
 }
 
@@ -58,7 +61,8 @@ void process_num(char *arg, void *mem)
             res = (res * 10) + (arg[i] - '0');
         } else
         {
-            fprintf(stderr, "Error: non number in '%s'\n", arg);
+            emit_err(NULL, NULL, 0, 0, G2003, ERROR);
+            write_err(mem);
             return;
         }
     }
