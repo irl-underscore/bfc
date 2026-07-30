@@ -24,6 +24,7 @@
 #include "tables/assembler/assembler_tables.h"
 
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 static void emit_syscall(arc_type target, string *dst, bf_call call, char *arg0, char *arg1, char *arg2)
@@ -34,9 +35,10 @@ static void emit_syscall(arc_type target, string *dst, bf_call call, char *arg0,
     else string_append_format(dst, "\tmov%s $%i, %%%s\n", asms[ASM_EXT_MAX_LEN], syscall, asms[ASM_REG_CALL]);
 
     #define EMIT_ARG(arg_num) \
-    if (!arg ## arg_num) return; \
-    if (strncmp(arg ## arg_num, "$0", 3) == 0) string_append_format(dst, "\txor%s %%%s, %%%s", asms[ASM_EXT_MAX_LEN], asms[ASM_REG_PARAM ## arg_num], asms[ASM_REG_PARAM ## arg_num]); \
-    else string_append_format(dst, "\tmov%s %s, %%%s\n", asms[ASM_EXT_MAX_LEN], arg ## arg_num, asms[ASM_REG_PARAM ## arg_num]); \
+    if (arg ## arg_num) { \
+        if (strncmp(arg ## arg_num, "$0", 4) == 0) string_append_format(dst, "\txor%s %%%s, %%%s\n", asms[ASM_EXT_MAX_LEN], asms[ASM_REG_PARAM ## arg_num], asms[ASM_REG_PARAM ## arg_num]); \
+        else string_append_format(dst, "\tmov%s %s, %%%s\n", asms[ASM_EXT_MAX_LEN], arg ## arg_num, asms[ASM_REG_PARAM ## arg_num]); \
+    } \
 
     EMIT_ARG(0)
     EMIT_ARG(1)
@@ -47,33 +49,60 @@ static void emit_syscall(arc_type target, string *dst, bf_call call, char *arg0,
     string_append_format(dst, "\t%s\n", asms[ASM_SYSCALL]);
 }
 
-static void emit_inc_op(arc_type type, string *dst, uint16_t count)
-{
-    if (count == 1) string_append_format(dst, "\tinc%s (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE]);
-    else if (count > 1) string_append_format(dst, "\tadd%s $%u, (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], count, assembler_table[type][ASM_REG_TAPE_BASE]);
+#define CLAMP(x, min, max) (x > min) ? (x < max) ? x : max : min;
+
+static void emit_add_op(arc_type type, string *dst, int32_t count, int8_t offset)
+{ // TODO: make function less if-heavy
+    if (count > 0)
+    {
+        if (offset == 0)
+        {
+            if (count == 1) string_append_format(dst, "\tinc%s (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE]);
+            else string_append_format(dst, "\tadd%s $%i, (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], count, assembler_table[type][ASM_REG_TAPE_BASE]);
+        } else if (offset > 0)
+        {
+            if (count == 1) string_append_format(dst, "\tinc%s (%%%s + $%i)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE], offset);
+            else string_append_format(dst, "\tadd%s $%i, (%%%s + $%i)\n", assembler_table[type][ASM_EXT_BYTE], count, assembler_table[type][ASM_REG_TAPE_BASE], offset);
+        } else
+        {
+            if (count == 1) string_append_format(dst, "\tinc%s (%%%s - $%i)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE], abs(offset));
+            else string_append_format(dst, "\tadd%s $%i, (%%%s - $%i)\n", assembler_table[type][ASM_EXT_BYTE], count, assembler_table[type][ASM_REG_TAPE_BASE], abs(offset));
+        }
+    } else
+    {
+        if (offset == 0)
+        {
+            if (count == 1) string_append_format(dst, "\tdec%s (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE]);
+            else string_append_format(dst, "\tsub%s $%i, (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], count, assembler_table[type][ASM_REG_TAPE_BASE]);
+        } else if (offset > 0)
+        {
+            if (count == 1) string_append_format(dst, "\tdec%s (%%%s + $%i)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE], offset);
+            else string_append_format(dst, "\tsub%s $%i, (%%%s + $%i)\n", assembler_table[type][ASM_EXT_BYTE], count, assembler_table[type][ASM_REG_TAPE_BASE], offset);
+        } else
+        {
+            if (count == 1) string_append_format(dst, "\tdec%s (%%%s - $%i)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE], abs(offset));
+            else string_append_format(dst, "\tsub%s $%i, (%%%s - $%i)\n", assembler_table[type][ASM_EXT_BYTE], count, assembler_table[type][ASM_REG_TAPE_BASE], abs(offset));
+        }
+    }
 }
 
-static void emit_dec_op(arc_type type, string *dst, uint16_t count)
+static void emit_set_op(arc_type type, string *dst, int32_t count)
 {
-    if (count == 1) string_append_format(dst, "\tdec%s (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], assembler_table[type][ASM_REG_TAPE_BASE]);
-    else if (count > 1) string_append_format(dst, "\tsub%s $%u, (%%%s)\n", assembler_table[type][ASM_EXT_BYTE], count, assembler_table[type][ASM_REG_TAPE_BASE]);
+    if (count == 0) string_append_format(dst, "\txor%s (%%%s), (%%%s)\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_TAPE_BASE], assembler_table[type][ASM_REG_TAPE_BASE]);
+    else string_append_format(dst, "\tmov%s $i, (%%%s)\n", assembler_table[type][ASM_EXT_MAX_LEN], count, assembler_table[type][ASM_REG_TAPE_BASE]);
 }
 
-static void emit_clear_op(arc_type type, string *dst)
+static void emit_shift_op(arc_type type, string *dst, int32_t count)
 {
-    string_append_format(dst, "\txor%s %%%s, %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_TAPE_BASE], assembler_table[type][ASM_REG_TAPE_BASE]);
-}
-
-static void emit_lshift_op(arc_type type, string *dst, uint16_t count)
-{
-    if (count == 1) string_append_format(dst, "\tdec%s %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_TAPE_BASE]);
-    else if (count > 1) string_append_format(dst, "\tsub%s $%u, %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], count, assembler_table[type][ASM_REG_TAPE_BASE]);
-}
-
-static void emit_rshift_op(arc_type type, string *dst, uint16_t count)
-{
-    if (count == 1) string_append_format(dst, "\tinc%s %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_TAPE_BASE]);
-    else if (count > 1) string_append_format(dst, "\tadd%s $%u, %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], count, assembler_table[type][ASM_REG_TAPE_BASE]);
+    if (count > 0)
+    {
+        if (count == 1) string_append_format(dst, "\tdec%s %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_TAPE_BASE]);
+        else string_append_format(dst, "\tsub%s $%u, %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], count, assembler_table[type][ASM_REG_TAPE_BASE]);
+    } else
+    {
+        if (count == -1) string_append_format(dst, "\tinc%s %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], assembler_table[type][ASM_REG_TAPE_BASE]);
+        else string_append_format(dst, "\tadd%s $%u, %%%s\n", assembler_table[type][ASM_EXT_MAX_LEN], count, assembler_table[type][ASM_REG_TAPE_BASE]);
+    }
 }
 
 static void emit_loop_start(arc_type type, string *dst, uint16_t *loop_count, stack *loop_stack)
@@ -143,11 +172,9 @@ static res process_intructions(arc_type type, string *dst, dyn_array *operations
         ir_operation op = *(ir_operation*)dyn_array_get(operations, i);
         switch (op.type)
         {
-            case IR_INC: emit_inc_op(type, dst, op.count);  break;
-            case IR_DEC: emit_dec_op(type, dst, op.count); break;
-            case IR_CLEAR: emit_clear_op(type, dst);  break;
-            case IR_LSHIFT: emit_lshift_op(type, dst, op.count); break;
-            case IR_RSHIFT: emit_rshift_op(type, dst, op.count); break;
+            case IR_ADD: emit_add_op(type, dst, op.count, op.offset);  break;
+            case IR_SET: emit_set_op(type, dst, op.count);  break;
+            case IR_SHIFT: emit_shift_op(type, dst, op.count); break;
             case IR_LLOOP: emit_loop_start(type, dst, &loops, loop_stack); break;
             case IR_RLOOP: emit_loop_end(dst, loop_stack); break;
             case IR_IN: emit_in_op(type, dst, &outs); break;

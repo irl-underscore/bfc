@@ -74,8 +74,8 @@ void dyn_array_insert_end(dyn_array *arr, void *obj)
         if (valide) obj = &arr->data[offset];
     }
 
-    void *dest = (byte*)arr->data + (arr->index * arr->obj_size);
-    memmove(dest, obj, arr->obj_size);
+    void *dst = (byte*)arr->data + (arr->index * arr->obj_size);
+    memmove(dst, obj, arr->obj_size);
     arr->index++;
 }
 
@@ -90,8 +90,19 @@ void dyn_array_restrict_insert_end(dyn_array *__restrict__ arr, void *__restrict
         arr = new_arr;
     }
 
-    void *dest = (byte*)arr->data + (arr->index * arr->obj_size);
-    memcpy(dest, obj, arr->obj_size);
+    void *dst = (byte*)arr->data + (arr->index * arr->obj_size);
+    memcpy(dst, obj, arr->obj_size);
+    arr->index++;
+}
+
+void dyn_array_replace_at(dyn_array *__restrict__ arr, void *__restrict__ obj, size_t index)
+{
+    if (!arr || !obj) return;
+
+    if (index >= arr->index) return;
+
+    void *dst = (byte*)arr->data + (index * arr->obj_size);
+    memcpy(dst, obj, arr->obj_size);
     arr->index++;
 }
 

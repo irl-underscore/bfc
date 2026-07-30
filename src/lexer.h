@@ -16,19 +16,32 @@
 
 #ifndef LEXER_H
 #define LEXER_H
-#include "tables/ir_map.h"
 #include "dyn_array.h"
 #include "file.h"
 
 #include <stdint.h>
 
+typedef enum ir_type
+{
+    IR_NOP,
+    IR_ADD,
+    IR_SET,
+    IR_SHIFT,
+    IR_OUT,
+    IR_IN,
+    IR_LLOOP,
+    IR_RLOOP,
+    IR_END
+} ir_type;
+
 typedef struct ir_operation
 {
     ir_type type;
-    uint16_t count;
+    int32_t count;
+    uint16_t offset;
 } ir_operation;
 
 dyn_array *parse_file(file_buf *buf);
-dyn_array *post_process(dyn_array *operations);
+void post_process(dyn_array **operations);
 
 #endif /* LEXER_H */

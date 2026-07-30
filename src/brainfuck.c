@@ -20,7 +20,6 @@
 #include "lexer.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 
 #define ASSERT_TO(cond, to) if (!(cond)) \
 { \
@@ -43,10 +42,9 @@ res process(compiler_options defaults, char *argv[], uint32_t argc)
     dyn_array *operations = parse_file(buf);
     ASSERT_TO(operations, destroy_file_buf)
 
-    dyn_array *temp = post_process(operations);
-    ASSERT_TO(temp, destroy_operations)
+    post_process(&operations);
+    ASSERT_TO(operations, destroy_operations)
 
-    operations = temp;
     assemble_ctx *ctx = ctx_init(opts.tape_size);
     ASSERT_TO(ctx, destroy_operations)
 
