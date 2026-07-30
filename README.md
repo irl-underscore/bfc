@@ -34,8 +34,6 @@ $ make rel CC=<your_compiler>
 and the compiled code will end up under `release/bfc`
 ## TODO
 - Complete x86_linux support and add support for arm_linux and arm64_linux
-- Add proper error system
-- Add table mangement for assembler
 - Add testing
 - Add consistent and readable naming
 ## License 
