@@ -1,0 +1,4 @@
+CompileFlags:
+  Add: [
+    '-I../bf_core/include/'
+  ]

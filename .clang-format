@@ -1,0 +1,22 @@
+Language: C
+
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeElse: false
+
+ColumnLimit: 0
+# Note: still considder using a maximum of 60 lines per function
+
+SortIncludes: false
+PointerAlignment: Right
+AllowShortFunctionsOnASingleLine: true
+AllowShortBlocksOnASingleLine: true

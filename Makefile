@@ -1,60 +1,94 @@
-ifeq ($(OS), Windows_NT)
-    MKDIR = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
-    CLEAN = if exist "$(subst /,\,$(1))" rd /s /q "$(subst /,\,$(1))"
-    EXE := .exe
+BFC := bfc
+LIB_BF := bf_core
+LIB_BF_NAME := libbf_core.a
+
+GFLAGS := -Wall -Wextra
+GDFLAGS := -DVER_MIN=1 -DVER_MAJOR=1 -DVER_PATCH=1 -DPNAME=\"$(TARGET)\"
+
+CC = gcc
+CFLAGS = $(GFLAGS) $(GDFLAGS) -std=gnu99 -MMD -MP -Ibf_core/include/
+DEBUG_FLAGS := -DEBUG=1 -g
+RELEASE_FLAGS := -O3
+TEST_FLAGS := $(DEBUG_FLAGS) -DTEST=1
+
+LD = gcc
+LFLAGS = $(GFLAGS) -lm -L$(LIB_DIR) -l$(LIB_BF)
+
+AR = ar
+ARFLAGS = rcs
+
+P ?= 0
+ifeq ($(P), 1)
+	Q :=
 else
-    MKDIR = mkdir -p $(1)
-    CLEAN = rm -rf $(1)
-    EXE :=
+	Q := @
 endif
 
-RWILDCARD = $(foreach d,$(wildcard $(1:=/*)),$(call RWILDCARD,$d,$2) $(filter $(subst *,%,$2),$d))
+SRC_DIR = src
+LIB_SRC_DIR = bf_core/src
+BUILD_DIR = build
+BIN_DIR = bin
+LIB_DIR = $(BIN_DIR)/lib
+OBJ_DIR = $(BUILD_DIR)/obj
 
-MAJOR := 1
-MINOR := 0
-PATCH := 0
-PROJECT := bfc
+SRCS = $(shell find "$(SRC_DIR)" -name "*.c")
+OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
+LIB_SRCS = $(shell find "$(LIB_SRC_DIR)" -name "*.c")
+LIB_OBJS = $(patsubst $(LIB_SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(LIB_SRCS))
+DEPS = $(OBJS:.o=.d)
 
-CC ?= clang
-CFLAGS := -Wall -Wextra -std=gnu99 -MMD -DVERSION_MAJOR=$(MAJOR) -DVERSION_MINOR=$(MINOR) -DVERSION_PATCH=$(PATCH) -DPROJECT=\"$(PROJECT)\"
-RELFLAGS := -O3
-DBFLAGS := -g -DDEBUG=1
+all: debug
 
-OBJ_EXTENSION := o
-DEBUG_DIR := debug
-DEBUG_OBJ_DIR := $(DEBUG_DIR)/obj
-RELEASE_DIR := release
-RELEASE_OBJ_DIR := $(RELEASE_DIR)/obj
-SRC_DIR := src
+debug: _invoke_debug_flags _compile
+release: _invoke_release_flags _compile
 
-SRCS := $(call RWILDCARD,$(SRC_DIR),*.c)
-DEBUG_OBJS := $(patsubst $(SRC_DIR)/%.c, $(DEBUG_OBJ_DIR)/%.o, $(SRCS))
-RELEASE_OBJS := $(patsubst $(SRC_DIR)/%.c, $(RELEASE_OBJ_DIR)/%.o, $(SRCS))
+_compile: clean $(LIB_DIR)/$(LIB_BF_NAME) $(BIN_DIR)/$(BFC)
 
-DEBUG := $(DEBUG_DIR)/$(PROJECT)
-RELEASE := $(RELEASE_DIR)/$(PROJECT)
+$(BIN_DIR)/$(BFC): $(OBJS)
+	@echo "LD\t$@"
+	$(Q)mkdir -p $(dir $@)
+	$(Q)$(LD) $^ -o $@ $(LFLAGS)
+ifeq ($(REL), 1)
+	$(Q)strip $@
+endif
 
-.PHONY: all clean rel run test
+$(LIB_DIR)/$(LIB_BF_NAME): $(LIB_OBJS)
+	@echo "AR\t$@"
+	$(Q)mkdir -p $(dir $@)
+	$(Q)$(AR) $(ARFLAGS) $@ $^
+ifeq ($(REL), 1)
+	$(Q)strip $@
+endif
 
-all: $(DEBUG)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@echo "CC\t$<"
+	$(Q)mkdir -p $(dir $@)
+	$(Q)$(CC) -c $< -o $@ $(CFLAGS)
 
-$(DEBUG): $(DEBUG_OBJS) | $(DEBUG_DIR)
-	$(CC) $(CFLAGS) $(DBFLAGS) $^ -o $@
+$(OBJ_DIR)/%.o: $(LIB_SRC_DIR)/%.c
+	@echo "CC\t$<"
+	$(Q)mkdir -p $(dir $@)
+	$(Q)$(CC) -c $< -o $@ $(CFLAGS)
 
-rel: $(RELEASE_OBJS) | $(RELEASE_DIR)
-	$(CC) $(CFLAGS) $(RELFLAGS) $^ -o $(RELEASE)
+-include $(DEPS)
+include install.mk
 
-$(DEBUG_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(DEBUG_OBJ_DIR)
-	$(call MKDIR,$(dir $@))
-	$(CC) $(CFLAGS) $(DBFLAGS) -c $< -o $@
+.PHONY: _invoke_debug_flags _invoke_release_flags
+_invoke_debug_flags:
+	$(eval CFLAGS += $(DEBUG_FLAGS))
+	$(eval LFLAGS += $(DEBUG_FLAGS))
 
-$(RELEASE_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(RELEASE_OBJ_DIR)
-	$(call MKDIR,$(dir $@))
-	$(CC) $(CFLAGS) $(RELFLAGS) -c $< -o $@
+_invoke_release_flags:
+	$(eval CFLAGS += $(RELEASE_FLAGS))
+	$(eval LFLAGS += $(RELEASE_FLAGS))
 
-$(DEBUG_DIR) $(RELEASE_DIR) $(DEBUG_OBJ_DIR) $(RELEASE_OBJ_DIR):
-	$(call MKDIR,$@)
+.PHONY: run
+run: $(BIN_DIR)/$(BFC)
+	@echo "RUN\t$<"
+	$(Q)./$(BIN_DIR)/$(BFC)
 
 clean:
-	$(call CLEAN,$(DEBUG_DIR))
-	$(call CLEAN,$(RELEASE_DIR))
+	@echo "RM\t$(BUILD_DIR)"
+	$(Q)rm -rf $(BUILD_DIR)
+	@echo "RM\t$(BIN_DIR)"
+	$(Q)rm -rf $(BIN_DIR)

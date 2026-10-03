@@ -1,10 +1,2 @@
-# Ignore binary output files
-**/*.exe
-**/*.dll
-**/*.a
-**/*.o
-**/*.d
-**/*.bat
-
-# ...
-**/*.txt
+build/
+bin/
