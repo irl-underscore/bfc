@@ -37,4 +37,8 @@ typedef enum Bool_e : U8
     TRUE = 1
 } Bool;
 
+#define U8_MAX 0xFF
+#define U16_MAX 0xFFFF
+#define U32_MAX 0xFFFFFF
+
 #endif /* BF_BASE_TYPES_H */
