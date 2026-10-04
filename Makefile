@@ -40,9 +40,9 @@ DEPS = $(OBJS:.o=.d)
 all: debug
 
 debug: _invoke_debug_flags _compile
-release: _invoke_release_flags _compile
+release: _invoke_release_flags clean _compile
 
-_compile: clean $(LIB_DIR)/$(LIB_BF_NAME) $(BIN_DIR)/$(BFC)
+_compile: $(LIB_DIR)/$(LIB_BF_NAME) $(BIN_DIR)/$(BFC)
 
 $(BIN_DIR)/$(BFC): $(OBJS)
 	@echo "LD\t$@"

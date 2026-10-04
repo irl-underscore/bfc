@@ -1,6 +1,7 @@
 #ifndef BF_STACK_H
 #define BF_STACK_H
 #include "bf_base_types.h"
+#include "bf_defs.h"
 
 #define BF_STACK_MAX_SIZE 128
 
@@ -17,7 +18,7 @@ static inline void bfStackPush(BfStack *pStack, U32 elem)
 
 static inline U32 bfStackPop(BfStack *pStack)
 {
-    if (pStack->head == 0) // unlikely
+    if (UNLIKELY(pStack->head == 0))
     {
         return U32_MAX;
     }

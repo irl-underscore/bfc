@@ -1,5 +1,6 @@
 #include "bf_parser.h"
 
+#include "bf_error.h"
 #include "bf_stack.h"
 #include "bf_defs.h"
 
@@ -24,7 +25,7 @@ BfDynArray *bfParseFile(const char *pFileName)
     I16 fd = open(pFileName, O_RDONLY);
     if (UNLIKELY(fd == -1))
     {
-        perror("bfc"); // TODO: Improve error system
+        emitStdErrorFmt(pFileName);
         return NULL;
     }
 
@@ -33,12 +34,13 @@ BfDynArray *bfParseFile(const char *pFileName)
     Byte *data = mmap(NULL, stats.st_size, PROT_READ, MAP_DENYWRITE | MAP_PRIVATE, fd, 0);
     if (UNLIKELY(data == MAP_FAILED))
     {
-        perror("bfc");
+        emitStdError();
         return NULL;
     }
 
     BfDynArray *instructions = bfDynArrayCreate(128, sizeof(BfIrInstruction));
     BfStack stack;
+    stack.head = 0;
     U32 loopCount = 0;
     for (Size i = 0; i < (Size)stats.st_size; i++)
     {
