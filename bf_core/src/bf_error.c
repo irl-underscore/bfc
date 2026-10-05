@@ -1,6 +1,7 @@
 #include "bf_error.h"
 
 #include "bf_base_types.h"
+#include "bf_terminal.h"
 
 #include <string.h>
 #include <errno.h>
@@ -29,4 +30,19 @@ void emitStdErrorFmt(const char *pFmt, ...)
     vsnprintf(fmtBuf, BF_MAX_ERROR_BUF_LEN, pFmt, args);
     va_end(args);
     fprintf(stderr, "%s: %s: %s\n", _pCallName, fmtBuf, strerror(errno));
+}
+
+void emitSyntaxError(const ErrorId id, const char *pFile, U32 line, U32 col)
+{
+    static const char *_pErrorIdTable[] = {
+        [ERROR_ID_TYPE_UNMATCHED_LOOP_END] = "Unmatched '['",
+        [ERROR_ID_TYPE_UNMATCHED_LOOP_START] = "Unmatched ']'"
+    };
+
+    bfSetTerminalCol(stderr, BF_TERMINAL_COLOR_BOLD_WHITE);
+    fprintf(stderr, "%s:%u:%u:", pFile, line, col);
+    bfSetTerminalCol(stderr, BF_TERMINAL_COLOR_BOLD_RED);
+    fprintf(stderr, " Error: ");
+    bfSetTerminalCol(stderr, BF_TERMINAL_COLOR_WHITE);
+    fprintf(stderr, "%s\n", _pErrorIdTable[id]);
 }

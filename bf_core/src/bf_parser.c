@@ -38,7 +38,7 @@ BfDynArray *bfParseFile(const char *pFileName)
         return NULL;
     }
 
-    BfDynArray *instructions = bfDynArrayCreate(128, sizeof(BfIrInstruction));
+    BfDynArray *instructions = bfDynArrayCreate(128, sizeof(BfIrInstruction)); // TODO: Implement arena allocator
     BfStack stack;
     stack.head = 0;
     U32 loopCount = 0;
@@ -56,9 +56,8 @@ BfDynArray *bfParseFile(const char *pFileName)
                 U32 endId = bfStackPop(&stack);
                 if (UNLIKELY(endId == U8_MAX))
                 {
-                    // error
-                    printf("Failing because lonely ]\n");
-                    break;
+                    emitSyntaxError(ERROR_ID_TYPE_UNMATCHED_LOOP_END, pFileName, 0, 0);
+                    return NULL;
                 }
 
                 inst.val = endId;
@@ -70,11 +69,7 @@ BfDynArray *bfParseFile(const char *pFileName)
 
     if (UNLIKELY(stack.head != 0))
     {
-        // error
-        printf("Failed because lonely [/]\n");
-        printf("Stack entries: ");
-        while (stack.head != 0) printf("%u ", bfStackPop(&stack));
-        printf("\n");
+        emitSyntaxError(ERROR_ID_TYPE_UNMATCHED_LOOP_START, pFileName, 0, 0);
         return NULL;
     }
 
