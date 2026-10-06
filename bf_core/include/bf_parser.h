@@ -9,8 +9,7 @@ typedef enum BfIrInstructionType_e
     BF_IR_INSTRUCTION_TYPE_SUB, // -
     BF_IR_INSTRUCTION_TYPE_RIGHT_SHIFT, // >
     BF_IR_INSTRUCTION_TYPE_LEFT_SHIFT, // <
-    BF_IR_INSTRUCTION_TYPE_LOOP_START, // [
-    BF_IR_INSTRUCTION_TYPE_LOOP_END, // ]
+    BF_IR_INSTRUCTION_TYPE_LOOP, // [
     BF_IR_INSTRUCTION_TYPE_OUT, // .
     BF_IR_INSTRUCTION_TYPE_IN // ,
 } BfIrInstructionType;
@@ -18,10 +17,17 @@ typedef enum BfIrInstructionType_e
 typedef struct BfIrInstruction_s
 {
     BfIrInstructionType type;
-    U16 val;
+    I32 val;
+    Size loopLen;
 } BfIrInstruction;
 
-BfDynArray *bfParseFile(const char *pFileName);
+typedef struct BfCursorSpec_s
+{
+    U32 row, col;
+    const Char *pFileName;
+} BfCursorSpec;
+
+Bool bfParseFile(const Char *pFileName, BfDynArray *pDst);
 BfDynArray *bfOptimizeIntructions(BfDynArray *pDynArray);
 
 #endif /* BF_LEXER_H */

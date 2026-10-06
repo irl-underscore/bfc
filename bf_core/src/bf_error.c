@@ -32,15 +32,15 @@ void emitStdErrorFmt(const char *pFmt, ...)
     fprintf(stderr, "%s: %s: %s\n", _pCallName, fmtBuf, strerror(errno));
 }
 
-void emitSyntaxError(const ErrorId id, const char *pFile, U32 line, U32 col)
+void emitSyntaxError(const ErrorId id, const char *pFile, U32 row, U32 col)
 {
     static const char *_pErrorIdTable[] = {
-        [ERROR_ID_TYPE_UNMATCHED_LOOP_END] = "Unmatched '['",
-        [ERROR_ID_TYPE_UNMATCHED_LOOP_START] = "Unmatched ']'"
+        [BF_ERROR_ID_TYPE_UNMATCHED_LOOP_END] = "Unmatched '['",
+        [BF_ERROR_ID_TYPE_UNMATCHED_LOOP_START] = "Unmatched ']'"
     };
 
     bfSetTerminalCol(stderr, BF_TERMINAL_COLOR_BOLD_WHITE);
-    fprintf(stderr, "%s:%u:%u:", pFile, line, col);
+    fprintf(stderr, "%s:%u:%u:", pFile, row, col);
     bfSetTerminalCol(stderr, BF_TERMINAL_COLOR_BOLD_RED);
     fprintf(stderr, " Error: ");
     bfSetTerminalCol(stderr, BF_TERMINAL_COLOR_WHITE);

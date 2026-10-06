@@ -9,4 +9,9 @@
     #define LIKELYLIKELY(cond) (cond)
 #endif /* __GNUC__ || __clang__ */
 
+#define BF_NATURAL_ALIGN(num) (num & (-num))
+#define BF_ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
+
+#define BF_MB (1024 * 1024)
+
 #endif /* BF_DEFS_H */

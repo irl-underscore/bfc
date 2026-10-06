@@ -1,40 +1,39 @@
 #include "bf_dyn_array.h"
 
+#include "bf_arena.h"
 #include "bf_defs.h"
 
 #include <string.h>
 #include <stdlib.h>
 
-struct BfDynArray_s
-{
-    Size capacity; // per elements
-    Size used; // also
-    Size elemSize;
-    Byte *data;
-};
+static inline Bool _dynArrayResize(BfDynArray *pDynArray, Size newSize);
 
-static void _dynArrayResize(BfDynArray *pDynArray, Size newSize);
-
-BfDynArray *bfDynArrayCreate(Size initialSize, Size elemSize)
+Bool bfDynArrayCreate(Size initialSize, Size elemSize, BfDynArray *pDst, BfArena *pArena)
 {
-    BfDynArray *pDynArray = malloc(sizeof(BfDynArray));
-    pDynArray->data = malloc(initialSize * elemSize);
-    pDynArray->capacity = initialSize;
-    pDynArray->used = 0;
-    pDynArray->elemSize = elemSize;
-    return pDynArray;
+    pDst->data = bfArenaAllocate(pArena, initialSize * elemSize);
+    if (!pDst->data)
+    {
+        return FALSE;
+    }
+
+    pDst->capacity = initialSize;
+    pDst->used = 0;
+    pDst->elemSize = elemSize;
+    pDst->pArena = pArena;
+    return TRUE;
 }
 
-void bfDynArrayAppend(BfDynArray *__restrict pDynArray, void *__restrict elem)
+Bool bfDynArrayAppend(BfDynArray *__restrict pDynArray, void *__restrict elem)
 {
     Size requiredCapacity = pDynArray->used + 1;
     if (requiredCapacity >= pDynArray->capacity)
     {
-        _dynArrayResize(pDynArray, (pDynArray->capacity + (pDynArray->capacity >> 1)) * pDynArray->elemSize);
+        if (_dynArrayResize(pDynArray, (pDynArray->capacity + (pDynArray->capacity >> 1)) * pDynArray->elemSize) == FALSE) return FALSE;
     }
 
     memcpy(pDynArray->data + (pDynArray->used * pDynArray->elemSize), elem, pDynArray->elemSize);
     pDynArray->used++;
+    return TRUE;
 }
 
 void *bfDynArrayGet(BfDynArray *pDynArray, Size idx)
@@ -56,12 +55,13 @@ void bfDynArrayDestroy(BfDynArray *pDynArray)
     free(pDynArray);
 }
 
-static void _dynArrayResize(BfDynArray *pDynArray, Size newSize)
+static inline Bool _dynArrayResize(BfDynArray *pDynArray, Size newSize)
 {
-    Byte *tempPtr = realloc(pDynArray->data, newSize);
-    if (LIKELY(tempPtr))
+    if (bfArenaRealloc(pDynArray->pArena, (void**)&pDynArray->data, pDynArray->capacity, pDynArray->capacity + (pDynArray->capacity >> 1)) == TRUE)
     {
-        pDynArray->data = tempPtr;
         pDynArray->capacity = newSize;
+        return TRUE;
     }
+
+    return FALSE;
 }
