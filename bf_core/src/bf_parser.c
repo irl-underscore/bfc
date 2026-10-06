@@ -1,6 +1,5 @@
 #include "bf_parser.h"
 
-#include "bf_arena.h"
 #include "bf_dyn_array.h"
 #include "bf_error.h"
 #include "bf_defs.h"
@@ -55,8 +54,8 @@ Bool bfParseFile(const Char *pFileName, BfDynArray *pDst)
 
     BfCursorSpec spec;
     spec.pFileName = pFileName;
-    spec.row = 0;
-    spec.col = 0;
+    spec.row = 1;
+    spec.col = 1;
     for (Size i = 0; i < (Size)stats.st_size; i++)
     {
         pData++;
@@ -83,7 +82,7 @@ Bool bfParseFile(const Char *pFileName, BfDynArray *pDst)
         } else if (current == '\n')
         {
             spec.row++;
-            spec.col = 0;
+            spec.col = 1;
             continue;
         }
 
@@ -120,6 +119,7 @@ static Bool _bfParseLoop(Char **ppData, Size dataLen, BfDynArray *pDst, BfCursor
     BfCursorSpec startSpec = *pSpec;
     BfIrInstruction loop;
     loop.type = BF_IR_INSTRUCTION_TYPE_LOOP;
+    loop.loopLen = 0;
     bfDynArrayAppend(pDst, &loop);
     BfIrInstruction *pLoop = (BfIrInstruction*)(pDst->data + (pDst->used - pDst->elemSize));
     for (Size i = 0; i < dataLen; i++)
@@ -144,11 +144,12 @@ static Bool _bfParseLoop(Char **ppData, Size dataLen, BfDynArray *pDst, BfCursor
             goto lNextCol;
         } else if (current == ']')
         {
+            pSpec->col++;
             return TRUE;
         } else if (current == '\n')
         {
             pSpec->row++;
-            pSpec->col = 0;
+            pSpec->col = 1;
             continue;
         }
 
