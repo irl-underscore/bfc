@@ -43,6 +43,13 @@ S_OBJS := $(patsubst $(SRC_DIR)/%.s,$(S_OBJ_DIR)/%.o,$(S_SRCS))
 
 DEPS := $(C_OBJS:.o=.d) $(S_OBJS:.o=.d)
 
+P ?= 0
+ifeq ($(P),0)
+	Q := @
+else
+	Q :=
+endif
+
 .PHONY: all debug release
 all: $(MAKE_TEST_DIR)
 
@@ -53,23 +60,30 @@ rel:
 	$(MAKE) BUILD=release
 
 run: $(MAKE_TEST_DIR)
-	./$(MAKE_TEST_DIR) $(ARGS)
+	@echo "RUN\t$<"
+	$(Q)./$(MAKE_TEST_DIR) $(ARGS)
 
 $(MAKE_TEST_DIR): $(S_OBJS) $(C_OBJS) | $(BIN_DST_DIR)
-	$(LD) $^ -o $@ $(LFLAGS)
+	@echo "LD\t$@"
+	$(Q)$(LD) $^ -o $@ $(LFLAGS)
 
 $(C_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(C_OBJ_DIR)
-	$(CC) -c $< -o $@ $(CFLAGS)
+	@echo "CC\t$@"
+	$(Q)$(CC) -c $< -o $@ $(CFLAGS)
 
+# i dont konw why i put as there but ill keep it :)
 $(S_OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(S_OBJ_DIR)
-	$(AS) -c $< -o $@ $(SFLAGS)
+	@echo "AS\t$@"
+	$(Q)$(AS) -c $< -o $@ $(SFLAGS)
 
 -include $(DEPS)
 include install.mk
 
 $(BIN_DST_DIR) $(C_OBJ_DIR) $(S_OBJ_DIR):
-	mkdir -p $@
+	$(Q)mkdir -p $@
 
 clean:
-	rm -rf $(BUILD_DIR)
-	rm -rf $(BIN_DIR)
+	@echo "RM\t$(BUILD_DIR)"
+	$(Q)rm -rf $(BUILD_DIR)
+	@echo "RM\t$(BIN_DIR)"
+	$(Q)rm -rf $(BIN_DIR)
