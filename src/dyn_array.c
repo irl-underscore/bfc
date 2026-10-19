@@ -1,16 +1,16 @@
-#include "bf_dyn_array.h"
+#include "dyn_array.h"
 
-#include "bf_arena.h"
-#include "bf_defs.h"
+#include "arena.h"
+#include "defs.h"
 
 #include <string.h>
 #include <stdlib.h>
 
-static inline Bool _dynArrayResize(BfDynArray *pDynArray, Size newSize);
+static inline Bool _dynArrayResize(DynArray *pDynArray, Size newSize);
 
-Bool bfDynArrayCreate(Size initialSize, Size elemSize, BfDynArray *pDst, BfArena *pArena)
+Bool dynArrayCreate(Size initialSize, Size elemSize, DynArray *pDst, Arena *pArena)
 {
-    pDst->data = bfArenaAllocate(pArena, initialSize * elemSize);
+    pDst->data = arenaAllocate(pArena, initialSize * elemSize);
     if (!pDst->data)
     {
         return FALSE;
@@ -23,7 +23,7 @@ Bool bfDynArrayCreate(Size initialSize, Size elemSize, BfDynArray *pDst, BfArena
     return TRUE;
 }
 
-Bool bfDynArrayAppend(BfDynArray *__restrict pDynArray, void *__restrict elem)
+Bool dynArrayAppend(DynArray *__restrict pDynArray, void *__restrict elem)
 {
     Size requiredCapacity = pDynArray->used + 1;
     if (requiredCapacity >= pDynArray->capacity)
@@ -36,7 +36,7 @@ Bool bfDynArrayAppend(BfDynArray *__restrict pDynArray, void *__restrict elem)
     return TRUE;
 }
 
-void *bfDynArrayGet(BfDynArray *pDynArray, Size idx)
+void *dynArrayGet(DynArray *pDynArray, Size idx)
 {
     if (UNLIKELY(idx >= pDynArray->used))
     {
@@ -46,18 +46,9 @@ void *bfDynArrayGet(BfDynArray *pDynArray, Size idx)
     return pDynArray->data + (idx * pDynArray->elemSize);
 }
 
-void bfDynArrayDestroy(BfDynArray *pDynArray)
+static inline Bool _dynArrayResize(DynArray *pDynArray, Size newSize)
 {
-    if (!pDynArray) return;
-
-    if (pDynArray->data) free(pDynArray->data);
-
-    free(pDynArray);
-}
-
-static inline Bool _dynArrayResize(BfDynArray *pDynArray, Size newSize)
-{
-    if (bfArenaRealloc(pDynArray->pArena, (void**)&pDynArray->data, pDynArray->capacity, pDynArray->capacity + (pDynArray->capacity >> 1)) == TRUE)
+    if (arenaRealloc(pDynArray->pArena, (void**)&pDynArray->data, pDynArray->capacity, pDynArray->capacity + (pDynArray->capacity >> 1)) == TRUE)
     {
         pDynArray->capacity = newSize;
         return TRUE;

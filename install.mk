@@ -7,10 +7,12 @@ RES_PERMISSIONS := 755
 .PHONY: install
 
 install: release
-	@echo "INSTALL\t$(DESTDIR)$(BINDIR)/$(TARGET)"
-	$(Q)install -d $(DESTDIR)/$(BINDIR)/
-	$(Q)install $(BIN_DIR)/$(TARGET) $(DESTDIR)$(BINDIR)/$(TARGET) -m $(RES_PERMISSIONS)
+	@echo "This function is depricated do not use this!"
+	# @echo "INSTALL\t$(DESTDIR)$(BINDIR)/$(TARGET)"
+	# $(Q)install -d $(DESTDIR)/$(BINDIR)/
+	# $(Q)install $(BIN_DIR)/$(TARGET) $(DESTDIR)$(BINDIR)/$(TARGET) -m $(RES_PERMISSIONS)
 
 uninstall:
-	@echo "RM\t$(DESTDIR)$(BINDIR)/$(TARGET)"
-	$(Q)rm -f $(DESTDIR)$(BINDIR)/$(TARGET)
+	@echo "This function is depricated do not use this!"
+	# @echo "RM\t$(DESTDIR)$(BINDIR)/$(TARGET)"
+	# $(Q)rm -f $(DESTDIR)$(BINDIR)/$(TARGET)

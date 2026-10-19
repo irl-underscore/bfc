@@ -1,5 +1,5 @@
-#ifndef BF_BASE_TYPES_H
-#define BF_BASE_TYPES_H
+#ifndef BASE_TYPES_H
+#define BASE_TYPES_H
 
 /* Basic types */
 typedef __UINT8_TYPE__ U8;

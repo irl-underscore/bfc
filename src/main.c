@@ -1,8 +1,9 @@
-#include <bf_arena.h>
-#include <bf_defs.h>
-#include <bf_dyn_array.h>
-#include <bf_error.h>
-#include <bf_parser.h>
+#include "base_types.h"
+#include "arena.h"
+#include "defs.h"
+#include "dyn_array.h"
+#include "error.h"
+#include "parser.h"
 
 #include <stdio.h>
 
@@ -10,16 +11,25 @@ int main(int argc, char **ppArgv)
 {
     (void)argc;
     initCall(*ppArgv);
-    BfArena arena;
-    bfArenaCreate(BF_MB, &arena);
-    BfDynArray instructions;
-    bfDynArrayCreate(128, sizeof(BfIrInstruction), &instructions, &arena);
-    if (bfParseFile("test.bf", &instructions) == FALSE)
+    Arena arena;
+    if (arenaCreate(MB, &arena) == FALSE)
+    {
+        return 1;
+    }
+
+    DynArray instructions;
+    if (dynArrayCreate(128, sizeof(IrInstruction), &instructions, &arena) == FALSE)
+    {
+        return 1;
+    }
+
+    //printf("Entered parsing\n");
+    if (parseFile("test.bf", &instructions) == FALSE)
     {
         fprintf(stderr, "Failed\n");
         return 1;
     }
 
-    bfArenaDestroy(&arena);
+    arenaDestroy(&arena);
     return 0;
 }

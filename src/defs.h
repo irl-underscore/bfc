@@ -1,5 +1,5 @@
-#ifndef BF_DEFS_H
-#define BF_DEFS_H
+#ifndef DEFS_H
+#define DEFS_H
 
 #if defined (__GNUC__) || defined (__clang__)
     #define UNLIKELY(cond) __builtin_expect(!!(cond), 0)
@@ -9,9 +9,9 @@
     #define LIKELYLIKELY(cond) (cond)
 #endif /* __GNUC__ || __clang__ */
 
-#define BF_NATURAL_ALIGN(num) (num & (-num))
-#define BF_ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
+#define NATURAL_ALIGN(num) (num & (-num))
+#define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
 
-#define BF_MB (1024 * 1024)
+#define MB (1024 * 1024)
 
-#endif /* BF_DEFS_H */
+#endif /* DEFS_H */
