@@ -1,6 +1,5 @@
 #include "parser.h"
 
-#include "stack.h"
 #include "base_types.h"
 #include "dyn_array.h"
 #include "error.h"
@@ -11,6 +10,14 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+
+#define MAX_LOOP_INFOS 128
+
+struct _LoopInfoStack
+{
+    U8 head;
+    CursorSpec loops[MAX_LOOP_INFOS];
+};
 
 static IrInstruction _getInstruction(Char c);
 
@@ -53,12 +60,12 @@ Bool parseFile(const Char *pFileName, DynArray *pDst)
         return FALSE;
     }
 
-    Stack loopStack = {0};
-    U32 loopCount = 0;
+    Bool success = TRUE;
     CursorSpec spec;
     spec.pFileName = pFileName;
     spec.row = 1;
     spec.col = 1;
+    struct _LoopInfoStack loopStack = {0};
     Char *pEndPtr = pData + stats.st_size;
     while (pData < pEndPtr)
     {
@@ -68,14 +75,16 @@ Bool parseFile(const Char *pFileName, DynArray *pDst)
         {
             if (inst.kind == IR_INSTRUCTION_KIND_LOOP_START)
             {
-                stackPush(&loopStack, loopCount++);
+                loopStack.loops[loopStack.head++] = spec;
             } else if (inst.kind == IR_INSTRUCTION_KIND_LOOP_END)
             {
-                U32 loopId = stackPop(&loopStack);
-                if (loopId == U32_MAX)
+                if (loopStack.head == 0)
                 {
                     emitSyntaxError(ERROR_ID_TYPE_UNMATCHED_LOOP_END, spec.pFileName, spec.row, spec.col);
-                    return FALSE;
+                    success = FALSE;
+                } else
+                {
+                    loopStack.head--;
                 }
             }
 
@@ -92,11 +101,16 @@ Bool parseFile(const Char *pFileName, DynArray *pDst)
 
     if (loopStack.head != 0)
     {
-        emitSyntaxError(ERROR_ID_TYPE_UNMATCHED_LOOP_START, spec.pFileName, spec.row, spec.col);
-        return FALSE;
+        for (U8 i = 0; i < loopStack.head; i++)
+        {
+            CursorSpec loopSpec = loopStack.loops[i];
+            emitSyntaxError(ERROR_ID_TYPE_UNMATCHED_LOOP_START, loopSpec.pFileName, loopSpec.row, loopSpec.col);
+        }
+
+        success = FALSE;
     }
 
-    return TRUE;
+    return success;
 }
 
 DynArray *optimizeIntructions(DynArray *pDynArray)
