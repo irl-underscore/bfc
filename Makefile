@@ -54,10 +54,10 @@ endif
 all: $(MAKE_TEST_DIR)
 
 dbg:
-	$(MAKE) BUILD=debug
+	$(Q)$(MAKE) BUILD=debug
 
 rel:
-	$(MAKE) BUILD=release
+	$(Q)$(MAKE) BUILD=release
 
 run: $(MAKE_TEST_DIR)
 	@echo "RUN\t$<"
@@ -66,6 +66,9 @@ run: $(MAKE_TEST_DIR)
 $(MAKE_TEST_DIR): $(S_OBJS) $(C_OBJS) | $(BIN_DST_DIR)
 	@echo "LD\t$@"
 	$(Q)$(LD) $^ -o $@ $(LFLAGS)
+ifeq ($(BUILD),release)
+	$(Q)strip $@
+endif
 
 $(C_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(C_OBJ_DIR)
 	@echo "CC\t$@"
