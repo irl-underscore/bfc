@@ -1,4 +1,7 @@
 # Bfc
+> [!IMPORTANT]
+> This branch is inactive and unstable development is done in the rework branch
+
 _Short for brainfuck compiler._ </br>
 A brainfuck AOT compiler turning brainfuck code into GAS assembly.</br>
 ## Usage
