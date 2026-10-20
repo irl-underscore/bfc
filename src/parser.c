@@ -1,5 +1,6 @@
 #include "parser.h"
 
+#include "base_types.h"
 #include "error.h"
 
 #define MAX_LOOP_INFOS 128
@@ -10,45 +11,46 @@ struct _LoopInfoStack
     CursorSpec loops[MAX_LOOP_INFOS];
 };
 
-static struct _LoopInfoStack loopStack = {0};
-static CursorSpec spec;
+static struct _LoopInfoStack _loopStack = {0};
+static CursorSpec _spec;
+static SSize _bufIdx = 0;
 
-static Bool _appendInstruction(DynArray *pDst, Char c);
+static Bool _appendInstruction(IrInstruction *pBuf, Char c);
 
-Bool parseFile(File file, DynArray *pDst)
+SSize parseFile(File file, IrInstruction *pBuf)
 {
     Bool success = TRUE;
-    spec.pFileName = file.pFileName;
-    spec.row = 1;
-    spec.col = 1;
+    _spec.pFileName = file.pFileName;
+    _spec.row = 1;
+    _spec.col = 1;
     Char *pEndPtr = file.pData + file.size;
     Char *_pData = file.pData;
     while (_pData < pEndPtr)
     {
         Char c = *_pData++;
-        success = (_appendInstruction(pDst, c) == FALSE) ? FALSE : success;
+        success = (_appendInstruction(pBuf, c) == FALSE) ? FALSE : success;
         if (c == '\n')
         {
-            spec.row++;
-            spec.col = 1;
+            _spec.row++;
+            _spec.col = 1;
             continue;
         }
 
-        spec.col++;
+        _spec.col++;
     }
 
-    if (loopStack.head != 0)
+    if (_loopStack.head != 0)
     {
-        for (U8 i = 0; i < loopStack.head; i++)
+        for (U8 i = 0; i < _loopStack.head; i++)
         {
-            CursorSpec loopSpec = loopStack.loops[i];
+            CursorSpec loopSpec = _loopStack.loops[i];
             emitSyntaxError(ERROR_ID_UNMATCHED_LOOP_START, loopSpec.pFileName, loopSpec.row, loopSpec.col);
         }
 
         success = FALSE;
     }
 
-    return success;
+    return (success == TRUE) ? _bufIdx : -1;
 }
 
 DynArray *optimizeIntructions(DynArray *pDynArray)
@@ -56,7 +58,7 @@ DynArray *optimizeIntructions(DynArray *pDynArray)
     return pDynArray;
 }
 
-static Bool _appendInstruction(DynArray *pDst, Char c)
+static Bool _appendInstruction(IrInstruction *pBuf, Char c)
 {
     static const IrInstruction _instructionTable[U8_MAX] = {
         ['+'] = {IR_INSTRUCTION_KIND_ADD, 1},
@@ -70,21 +72,23 @@ static Bool _appendInstruction(DynArray *pDst, Char c)
     };
 
     IrInstruction inst = _instructionTable[(U8)c];
+    if (inst.val == 0) return TRUE;
+
     if (inst.kind == IR_INSTRUCTION_KIND_LOOP_START)
     {
-        loopStack.loops[loopStack.head++] = spec;
+        _loopStack.loops[_loopStack.head++] = _spec;
     } else if (inst.kind == IR_INSTRUCTION_KIND_LOOP_END)
     {
-        if (loopStack.head == 0)
+        if (_loopStack.head == 0)
         {
-            emitSyntaxError(ERROR_ID_UNMATCHED_LOOP_END, spec.pFileName, spec.row, spec.col);
+            emitSyntaxError(ERROR_ID_UNMATCHED_LOOP_END, _spec.pFileName, _spec.row, _spec.col);
             return FALSE;
         } else
         {
-            loopStack.head--;
+            _loopStack.head--;
         }
     }
 
-    dynArrayAppend(pDst, &inst);
+    pBuf[_bufIdx++] = inst;
     return TRUE;
 }

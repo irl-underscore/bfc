@@ -26,7 +26,7 @@ typedef struct CursorSpec_s
     const Char *pFileName;
 } CursorSpec;
 
-Bool parseFile(File file, DynArray *pDst);
+SSize parseFile(File file, IrInstruction *pBuf);
 DynArray *optimizeIntructions(DynArray *pDynArray);
 
 #endif /* PARSER_H */

@@ -1,6 +1,5 @@
 #include "dyn_array.h"
 
-#include "arena.h"
 #include "defs.h"
 
 #include <string.h>
@@ -8,9 +7,9 @@
 
 static inline Bool _dynArrayResize(DynArray *pDynArray, Size newSize);
 
-Bool dynArrayCreate(Size initialSize, Size elemSize, DynArray *pDst, Arena *pArena)
+Bool dynArrayCreate(Size initialSize, Size elemSize, DynArray *pDst)
 {
-    pDst->data = arenaAllocate(pArena, initialSize * elemSize);
+    pDst->data = malloc(initialSize * elemSize);
     if (!pDst->data)
     {
         return FALSE;
@@ -19,7 +18,6 @@ Bool dynArrayCreate(Size initialSize, Size elemSize, DynArray *pDst, Arena *pAre
     pDst->capacity = initialSize;
     pDst->used = 0;
     pDst->elemSize = elemSize;
-    pDst->pArena = pArena;
     return TRUE;
 }
 
@@ -46,10 +44,21 @@ void *dynArrayGet(DynArray *pDynArray, Size idx)
     return pDynArray->data + (idx * pDynArray->elemSize);
 }
 
+void dynArrayDestroy(DynArray *pDynArray)
+{
+    if (pDynArray->data) free(pDynArray->data);
+
+    pDynArray->capacity = 0;
+    pDynArray->elemSize = 0;
+    pDynArray->used = 0;
+}
+
 static inline Bool _dynArrayResize(DynArray *pDynArray, Size newSize)
 {
-    if (arenaRealloc(pDynArray->pArena, (void**)&pDynArray->data, pDynArray->capacity, pDynArray->capacity + (pDynArray->capacity >> 1)) == TRUE)
+    Byte *pTemp = realloc(pDynArray->data, newSize);
+    if (pTemp)
     {
+        pDynArray->data = pTemp;
         pDynArray->capacity = newSize;
         return TRUE;
     }
