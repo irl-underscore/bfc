@@ -31,6 +31,14 @@ Bool openFile(char *__restrict pFileName, File *__restrict pFile)
         return FALSE;
     }
 
+    if (S_ISDIR(fileStat.st_mode))
+    {
+        close(pFile->fd);
+        pFile->fd = -1;
+        emitErrorFmt("%s: is a directory", pFileName);
+        return FALSE;
+    }
+
     pFile->size = fileStat.st_size;
     pFile->pData = mmap(NULL, pFile->size, PROT_READ, MAP_PRIVATE | MAP_FILE, pFile->fd, 0);
     if (pFile->pData == MAP_FAILED)

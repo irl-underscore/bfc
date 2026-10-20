@@ -32,6 +32,21 @@ void emitStdErrorFmt(const char *pFmt, ...)
     fprintf(stderr, "%s: %s: %s\n", _pCallName, fmtBuf, strerror(errno));
 }
 
+void emitError(const Char *pMsg)
+{
+    fprintf(stderr, "%s: %s\n", _pCallName, pMsg);
+}
+
+void emitErrorFmt(const Char *pFmt, ...)
+{
+    va_list args;
+    va_start(args, pFmt);
+    Char fmtBuf[MAX_ERROR_BUF_LEN];
+    vsnprintf(fmtBuf, MAX_ERROR_BUF_LEN, pFmt, args);
+    va_end(args);
+    fprintf(stderr, "%s: %s\n", _pCallName, fmtBuf);
+}
+
 void emitSyntaxError(const ErrorId id, const char *pFile, U32 row, U32 col)
 {
     static const char *_pErrorIdTable[] = {

@@ -11,8 +11,11 @@ typedef enum ErrorId_e
 void initCall(char *pCall);
 
 void emitStdError(void);
-void emitStdErrorFmt(const char *pFmt, ...);
+void emitStdErrorFmt(const Char *pFmt, ...);
 
-void emitSyntaxError(const ErrorId id, const char *pFile, U32 row, U32 col);
+void emitError(const Char *pMsg);
+void emitErrorFmt(const Char *pFmt, ...);
+
+void emitSyntaxError(const ErrorId id, const Char *pFile, U32 row, U32 col);
 
 #endif /* ERROR_H */
