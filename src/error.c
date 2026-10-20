@@ -35,14 +35,14 @@ void emitStdErrorFmt(const char *pFmt, ...)
 void emitSyntaxError(const ErrorId id, const char *pFile, U32 row, U32 col)
 {
     static const char *_pErrorIdTable[] = {
-        [ERROR_ID_TYPE_UNMATCHED_LOOP_END] = "Unmatched ']'",
-        [ERROR_ID_TYPE_UNMATCHED_LOOP_START] = "Unmatched '['"
+        [ERROR_ID_UNMATCHED_LOOP_END] = "Unmatched ']'",
+        [ERROR_ID_UNMATCHED_LOOP_START] = "Unmatched '['"
     };
 
-    setTerminalCol(stderr, TERMINAL_COLOR_BOLD_WHITE);
+    setTerminalColor(stderr, TERMINAL_COLOR_BOLD_WHITE);
     fprintf(stderr, "%s:%u:%u:", pFile, row, col);
-    setTerminalCol(stderr, TERMINAL_COLOR_BOLD_RED);
+    setTerminalColor(stderr, TERMINAL_COLOR_BOLD_RED);
     fprintf(stderr, " Error: ");
-    setTerminalCol(stderr, TERMINAL_COLOR_WHITE);
+    setTerminalColor(stderr, TERMINAL_COLOR_WHITE);
     fprintf(stderr, "%s\n", _pErrorIdTable[id]);
 }

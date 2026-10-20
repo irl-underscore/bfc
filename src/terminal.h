@@ -10,6 +10,6 @@ typedef enum TerminalColor_e
     TERMINAL_COLOR_BOLD_WHITE
 } TerminalColor;
 
-void setTerminalCol(FILE *file, const TerminalColor color);
+void setTerminalColor(FILE *file, const TerminalColor color);
 
 #endif /* TERMINAL_H */

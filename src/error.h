@@ -4,8 +4,8 @@
 
 typedef enum ErrorId_e
 {
-    ERROR_ID_TYPE_UNMATCHED_LOOP_START,
-    ERROR_ID_TYPE_UNMATCHED_LOOP_END
+    ERROR_ID_UNMATCHED_LOOP_START,
+    ERROR_ID_UNMATCHED_LOOP_END
 } ErrorId;
 
 void initCall(char *pCall);
