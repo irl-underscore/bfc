@@ -15,18 +15,21 @@ int main(int argc, char **ppArgv)
     Arena arena;
     if (arenaCreate(MB, &arena) == FALSE)
     {
+        flushErrors();
         return 1;
     }
 
     DynArray instructions;
     if (dynArrayCreate(128, sizeof(IrInstruction), &instructions, &arena) == FALSE)
     {
+        flushErrors();
         return 1;
     }
 
     File input;
     if (openFile("test.bf", &input) == FALSE)
     {
+        flushErrors();
         return 1;
     }
 
