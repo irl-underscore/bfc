@@ -3,6 +3,7 @@
 #include "defs.h"
 #include "dyn_array.h"
 #include "error.h"
+#include "file.h"
 #include "parser.h"
 
 #include <stdio.h>
@@ -23,8 +24,13 @@ int main(int argc, char **ppArgv)
         return 1;
     }
 
-    //printf("Entered parsing\n");
-    if (parseFile("test.bf", &instructions) == FALSE)
+    File input;
+    if (openFile("test.bf", &input) == FALSE)
+    {
+        return 1;
+    }
+
+    if (parseFile(input, &instructions) == FALSE)
     {
         fprintf(stderr, "Failed\n");
         return 1;

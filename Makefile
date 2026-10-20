@@ -1,4 +1,4 @@
-MAKE_TEST := make-test
+MAKE_TEST := bfc
 
 BUILD ?= debug
 ARGS ?=

@@ -14,4 +14,12 @@
 
 #define MB (1024 * 1024)
 
+#if defined (__linux__)
+    #define OS_LINUX 1
+#elif defined (__APPLE__)
+    #define OS_APPLE 1
+#elif defined (_WIN32)
+    #define OS_WINDOWS 1
+#endif /* os */
+
 #endif /* DEFS_H */

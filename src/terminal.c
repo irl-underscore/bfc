@@ -1,18 +1,17 @@
 #include "terminal.h"
 
-#if defined (__linux__) || (defined (__APPLE__) && defined (__MACH__))
-static const char *_pLinuxColorLookupTable[] = {
-    [TERMINAL_COLOR_WHITE] = "\e[0;37m",
-    [TERMINAL_COLOR_BOLD_RED] = "\e[1;31m",
-    [TERMINAL_COLOR_BOLD_YELLOW] = "\e[1;33m",
-    [TERMINAL_COLOR_BOLD_WHITE] = "\e[1;37m"
-};
+#include "defs.h"
 
-inline void setTerminalColor(FILE *pFile, TerminalColor color)
+void setTerminalColor(FILE *pFile, TerminalColor color)
 {
+#if defined (OS_LINUX) || defined (OS_APPLE)
+    static const char *_pLinuxColorLookupTable[] = {
+        [TERMINAL_COLOR_WHITE] = "\e[0;37m",
+        [TERMINAL_COLOR_BOLD_RED] = "\e[1;31m",
+        [TERMINAL_COLOR_BOLD_YELLOW] = "\e[1;33m",
+        [TERMINAL_COLOR_BOLD_WHITE] = "\e[1;37m"
+    };
+
     fprintf(pFile, "%s", _pLinuxColorLookupTable[color]);
-}
-
-#elif defined (_WIN32)
-
 #endif /* os */
+}

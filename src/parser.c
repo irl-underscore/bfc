@@ -1,15 +1,6 @@
 #include "parser.h"
 
-#include "base_types.h"
-#include "dyn_array.h"
 #include "error.h"
-#include "defs.h"
-
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 
 #define MAX_LOOP_INFOS 128
 
@@ -24,53 +15,17 @@ static CursorSpec spec;
 
 static Bool _appendInstruction(DynArray *pDst, Char c);
 
-Bool parseFile(const Char *pFileName, DynArray *pDst)
+Bool parseFile(File file, DynArray *pDst)
 {
-    I32 fd = open(pFileName, O_RDONLY);
-    if (UNLIKELY(fd == -1))
-    {
-        emitStdErrorFmt(pFileName);
-        return FALSE;
-    }
-
-    struct stat stats;
-    if (UNLIKELY(fstat(fd, &stats) != 0))
-    {
-        emitStdErrorFmt(pFileName);
-        close(fd);
-        return FALSE;
-    }
-
-    if (UNLIKELY(stats.st_size == 0))
-    {
-        // TODO: Custom error
-        close(fd);
-        return FALSE;
-    }
-
-    if (UNLIKELY(S_ISDIR(stats.st_mode)))
-    {
-        // TODO: Custom error
-        close(fd);
-        return FALSE;
-    }
-
-    Char *pData = mmap(NULL, stats.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-    close(fd);
-    if (UNLIKELY(pData == MAP_FAILED))
-    {
-        emitStdError();
-        return FALSE;
-    }
-
     Bool success = TRUE;
-    spec.pFileName = pFileName;
+    spec.pFileName = file.pFileName;
     spec.row = 1;
     spec.col = 1;
-    Char *pEndPtr = pData + stats.st_size;
-    while (pData < pEndPtr)
+    Char *pEndPtr = file.pData + file.size;
+    Char *_pData = file.pData;
+    while (_pData < pEndPtr)
     {
-        Char c = *pData++;
+        Char c = *_pData++;
         success = (_appendInstruction(pDst, c) == FALSE) ? FALSE : success;
         if (c == '\n')
         {
@@ -114,7 +69,7 @@ static Bool _appendInstruction(DynArray *pDst, Char c)
         [','] = {IR_INSTRUCTION_KIND_IN, 1}
     };
 
-    IrInstruction inst = _instructionTable[c];
+    IrInstruction inst = _instructionTable[(U8)c];
     if (inst.kind == IR_INSTRUCTION_KIND_LOOP_START)
     {
         loopStack.loops[loopStack.head++] = spec;

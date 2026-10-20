@@ -1,6 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 #include "base_types.h"
+#include "file.h"
 #include "dyn_array.h"
 
 typedef enum IrInstructionKind_e
@@ -25,7 +26,7 @@ typedef struct CursorSpec_s
     const Char *pFileName;
 } CursorSpec;
 
-Bool parseFile(const Char *pFileName, DynArray *pDst);
+Bool parseFile(File file, DynArray *pDst);
 DynArray *optimizeIntructions(DynArray *pDynArray);
 
 #endif /* PARSER_H */
