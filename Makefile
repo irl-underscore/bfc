@@ -7,8 +7,6 @@ SRC_DIR := src
 BUILD_DIR := build
 DST_DIR := $(BUILD_DIR)/$(BUILD)
 OBJ_DIR := $(DST_DIR)/obj
-S_OBJ_DIR := $(OBJ_DIR)/asm
-C_OBJ_DIR := $(OBJ_DIR)/c
 BIN_DIR := bin
 BIN_DST_DIR := $(BIN_DIR)/$(BUILD)
 MAKE_TEST_DIR := $(BIN_DST_DIR)/$(MAKE_TEST)
@@ -37,9 +35,9 @@ else
 endif
 
 C_SRCS := $(shell find "$(SRC_DIR)" -name *.c)
-C_OBJS := $(patsubst $(SRC_DIR)/%.c,$(C_OBJ_DIR)/%.o,$(C_SRCS))
+C_OBJS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.c.o,$(C_SRCS))
 S_SRCS := $(shell find "$(SRC_DIR)" -name *.s)
-S_OBJS := $(patsubst $(SRC_DIR)/%.s,$(S_OBJ_DIR)/%.o,$(S_SRCS))
+S_OBJS := $(patsubst $(SRC_DIR)/%.s,$(OBJ_DIR)/%.s.o,$(S_SRCS))
 
 DEPS := $(C_OBJS:.o=.d) $(S_OBJS:.o=.d)
 
@@ -70,19 +68,19 @@ ifeq ($(BUILD),release)
 	$(Q)strip $@
 endif
 
-$(C_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(C_OBJ_DIR)
+$(OBJ_DIR)/%.c.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	@echo "CC\t$@"
 	$(Q)$(CC) -c $< -o $@ $(CFLAGS)
 
 # i dont konw why i put as there but ill keep it :)
-$(S_OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(S_OBJ_DIR)
+$(OBJ_DIR)/%.s.o: $(SRC_DIR)/%.s | $(OBJ_DIR)
 	@echo "AS\t$@"
 	$(Q)$(AS) -c $< -o $@ $(SFLAGS)
 
 -include $(DEPS)
 include install.mk
 
-$(BIN_DST_DIR) $(C_OBJ_DIR) $(S_OBJ_DIR):
+$(BIN_DST_DIR) $(OBJ_DIR):
 	$(Q)mkdir -p $@
 
 clean:
