@@ -8,7 +8,7 @@ typedef enum ErrorId_e
     ERROR_ID_UNMATCHED_LOOP_END
 } ErrorId;
 
-void initCall(Char *pCall);
+void initCall(const Char *pCall);
 
 void emitStdError(void);
 void emitStdErrorFmt(const Char *pFmt, ...);

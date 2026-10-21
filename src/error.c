@@ -8,16 +8,16 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#define MAX_ERROR_FMT_LEN 32
+#define MAX_ERROR_FMT_LEN 8
 #define MAX_ERROR_BUF_LEN 128
-#define MAX_ERROR_COUNT 64
+#define MAX_ERROR_COUNT 16
 
 static Char _errors[MAX_ERROR_COUNT][MAX_ERROR_BUF_LEN];
 static U8 _errorCount;
 
-static Char *_pCallName;
+static const Char *_pCallName;
 
-void initCall(Char *call)
+void initCall(const Char *call)
 {
     _pCallName = call;
 }

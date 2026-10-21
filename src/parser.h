@@ -20,12 +20,6 @@ typedef struct IrInstruction_s
     I32 val;
 } IrInstruction;
 
-typedef struct CursorSpec_s
-{
-    U32 row, col;
-    const Char *pFileName;
-} CursorSpec;
-
 SSize parseFile(File file, IrInstruction *pBuf);
 DynArray *optimizeIntructions(DynArray *pDynArray);
 

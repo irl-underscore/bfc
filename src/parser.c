@@ -5,14 +5,20 @@
 
 #define MAX_LOOP_INFOS 128
 
+struct _CursorInfo_s
+{
+    U32 row, col;
+    const Char *pFileName;
+};
+
 struct _LoopInfoStack
 {
     U8 head;
-    CursorSpec loops[MAX_LOOP_INFOS];
+    struct _CursorInfo_s loops[MAX_LOOP_INFOS];
 };
 
 static struct _LoopInfoStack _loopStack = {0};
-static CursorSpec _spec;
+static struct _CursorInfo_s _cursorInfo;
 static Size _bufIdx = 0;
 
 static Bool _appendInstruction(IrInstruction *pBuf, Char c);
@@ -20,9 +26,9 @@ static Bool _appendInstruction(IrInstruction *pBuf, Char c);
 SSize parseFile(File file, IrInstruction *pBuf)
 {
     Bool success = TRUE;
-    _spec.pFileName = file.pFileName;
-    _spec.row = 1;
-    _spec.col = 1;
+    _cursorInfo.pFileName = file.pFileName;
+    _cursorInfo.row = 1;
+    _cursorInfo.col = 1;
     Char *pEndPtr = file.pData + file.size;
     Char *_pData = file.pData;
     while (_pData < pEndPtr)
@@ -31,19 +37,19 @@ SSize parseFile(File file, IrInstruction *pBuf)
         success = (_appendInstruction(pBuf, c) == FALSE) ? FALSE : success;
         if (c == '\n')
         {
-            _spec.row++;
-            _spec.col = 1;
+            _cursorInfo.row++;
+            _cursorInfo.col = 1;
             continue;
         }
 
-        _spec.col++;
+        _cursorInfo.col++;
     }
 
     if (_loopStack.head != 0)
     {
         for (U8 i = 0; i < _loopStack.head; i++)
         {
-            CursorSpec loopSpec = _loopStack.loops[i];
+            struct _CursorInfo_s loopSpec = _loopStack.loops[i];
             emitSyntaxError(ERROR_ID_UNMATCHED_LOOP_START, loopSpec.pFileName, loopSpec.row, loopSpec.col);
         }
 
@@ -78,12 +84,12 @@ static Bool _appendInstruction(IrInstruction *pBuf, Char c)
 
     if (inst.kind == IR_INSTRUCTION_KIND_LOOP_START)
     {
-        _loopStack.loops[_loopStack.head++] = _spec;
+        _loopStack.loops[_loopStack.head++] = _cursorInfo;
     } else if (inst.kind == IR_INSTRUCTION_KIND_LOOP_END)
     {
         if (_loopStack.head == 0)
         {
-            emitSyntaxError(ERROR_ID_UNMATCHED_LOOP_END, _spec.pFileName, _spec.row, _spec.col);
+            emitSyntaxError(ERROR_ID_UNMATCHED_LOOP_END, _cursorInfo.pFileName, _cursorInfo.row, _cursorInfo.col);
             return FALSE;
         } else
         {
