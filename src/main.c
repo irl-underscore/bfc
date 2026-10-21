@@ -10,7 +10,7 @@ int main(int argc, char **ppArgv)
     (void)argc;
     initCall(*ppArgv);
     File input;
-    if (openFile("test.bf", &input) == FALSE)
+    if (openFile("test.bf", FILE_MODE_READ, &input) == FALSE)
     {
         flushErrors();
         return 1;

@@ -13,7 +13,7 @@ struct _LoopInfoStack
 
 static struct _LoopInfoStack _loopStack = {0};
 static CursorSpec _spec;
-static SSize _bufIdx = 0;
+static Size _bufIdx = 0;
 
 static Bool _appendInstruction(IrInstruction *pBuf, Char c);
 
@@ -50,7 +50,9 @@ SSize parseFile(File file, IrInstruction *pBuf)
         success = FALSE;
     }
 
-    return (success == TRUE) ? _bufIdx : -1;
+    SSize reBufIdx = _bufIdx;
+    _bufIdx = 0;
+    return (success == TRUE) ? reBufIdx : -1;
 }
 
 DynArray *optimizeIntructions(DynArray *pDynArray)

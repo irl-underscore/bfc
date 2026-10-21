@@ -12,10 +12,18 @@
     #include <unistd.h>
 #endif /*os */
 
-Bool openFile(char *__restrict pFileName, File *__restrict pFile)
+
+Bool openFile(const char *__restrict pFileName, const FileMode fileMode, File *__restrict pFile)
 {
 #if defined (OS_LINUX) || defined (OS_APPLE)
-    pFile->fd = open(pFileName, O_RDONLY);
+    static const int _oFlagTable[] = {
+        [FILE_MODE_READ] = O_RDONLY,
+        [FILE_MODE_WRITE] = O_WRONLY,
+        [FILE_MODE_READ_WRITE] = O_RDWR,
+        [FILE_MODE_CREATE] = O_CREAT
+    };
+
+    pFile->fd = open(pFileName, _oFlagTable[fileMode]);
     if (pFile->fd == -1)
     {
         emitStdError();
