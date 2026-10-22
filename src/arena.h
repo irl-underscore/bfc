@@ -2,11 +2,17 @@
 #define BF_ARENA_H
 #include "base_types.h"
 
+typedef struct ArenaChunk_s
+{
+    Size used;
+    struct ArenaChunk_s *pNext;
+    Byte data[];
+} ArenaChunk;
+
 typedef struct Arena_s
 {
     Size capacity;
-    Size used;
-    Byte *pData;
+    ArenaChunk *pRootChunk;
 } Arena;
 
 Bool arenaCreate(Size initialSize, Arena *pArena);
