@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static Bool _dynStringResize(DynString *pDynString);
+static Bool _dynStringResize(DynString *pDynString, Size size);
 
 Bool dynStringCreate(const Size intialCapacity, Arena *pArena, DynString *pDynString)
 {
@@ -25,11 +25,12 @@ Bool dynStringCreate(const Size intialCapacity, Arena *pArena, DynString *pDynSt
     return TRUE;
 }
 
-Bool dynStringAppend(DynString *pDynString, const Char *pStr, Size strLen)
+Bool dynStringAppend(DynString *pDynString, const Char *pStr)
 {
+    Size strLen = strnlen(pStr, 128);
     Size neededCapacity = pDynString->used + strLen;
     if (neededCapacity >= pDynString->capacity)
-        if (_dynStringResize(pDynString) == FALSE) return FALSE;
+        if (_dynStringResize(pDynString, strLen) == FALSE) return FALSE;
 
     strncpy(pDynString->pData + pDynString->used, pStr, strLen);
     pDynString->used += strLen;
@@ -44,9 +45,11 @@ Bool dynStringAppendFmt(DynString *pDynString, const Char *pFmt, ...)
     va_end(args);
     Size neededCapacity = pDynString->used + strLen;
     if (neededCapacity >= pDynString->capacity)
-        if (_dynStringResize(pDynString) == FALSE) return FALSE;
+        if (_dynStringResize(pDynString, strLen) == FALSE) return FALSE;
 
+    va_start(args, pFmt);
     vsnprintf(pDynString->pData + pDynString->used, strLen, pFmt, args);
+    va_end(args);
     pDynString->used += strLen;
     return TRUE;
 }
@@ -59,9 +62,11 @@ void dynStringDestroy(DynString *pDynString)
     pDynString->used = 0;
 }
 
-static Bool _dynStringResize(DynString *pDynString)
+static Bool _dynStringResize(DynString *pDynString, Size size)
 {
     Size newCapacity = (pDynString->capacity >> 1) + pDynString->capacity;
+    if (newCapacity < size) newCapacity = size;
+
     arenaRealloc(pDynString->pArena, (void**)&pDynString->pData, pDynString->capacity, newCapacity); // error handling comes later
     pDynString->capacity = newCapacity;
     return TRUE;

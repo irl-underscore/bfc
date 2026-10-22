@@ -24,11 +24,22 @@ void test_init(void)
     TEST_ASSERT_NOT_NULL(arena2.pRootChunk->pNext);
 }
 
+void test_alloc(void)
+{
+    Arena arena;
+    arenaCreate(100, &arena);
+    TEST_ASSERT_EQUAL(FALSE, arenaAllocate(&arena, 0));
+    void *pTemp = arenaAllocate(&arena, 400);
+    TEST_ASSERT_NOT_NULL(pTemp);
+    TEST_ASSERT_EQUAL(TRUE, arenaRealloc(&arena, &pTemp, 400, 800));
+}
+
 int main(void)
 {
     UNITY_BEGIN();
 
     RUN_TEST(test_init);
+    RUN_TEST(test_alloc);
 
     return (UNITY_END() != 0) ? 1 : 0;
 }

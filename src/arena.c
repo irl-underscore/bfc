@@ -2,6 +2,7 @@
 #include "base_types.h"
 #include "defs.h"
 #include "error.h"
+#include "test.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -30,6 +31,8 @@ Bool arenaCreate(Size capacity, Arena *pArena)
 
 void *arenaAllocate(Arena *pArena, Size size)
 {
+    if (size == 0) return NULL;
+
     ArenaChunk *pTargetChunk = _getFreeChunk(pArena, size);
     if (UNLIKELY(pTargetChunk == NULL))
     {
@@ -40,6 +43,7 @@ void *arenaAllocate(Arena *pArena, Size size)
 
     UPtr absAlignedAddr = ALIGN_UP((UPtr)(&pTargetChunk->data[pTargetChunk->used]), NATURAL_ALIGN(size));
     Size align = absAlignedAddr - (UPtr)&pTargetChunk->data[0];
+    TEST_LOG_FMT("Align of %zu is %zu", size, align);
     void *pRes = pTargetChunk->data + pTargetChunk->used + align;
     pTargetChunk->used += align + size;
     return pRes;
@@ -55,6 +59,8 @@ Bool arenaRealloc(Arena *pArena, void **ppData, Size oldSize, Size newSize)
             pCurrent->used += newSize - oldSize;
             return TRUE;
         }
+
+        pCurrent = pCurrent->pNext;
     }
 
     void *pTemp = arenaAllocate(pArena, newSize);

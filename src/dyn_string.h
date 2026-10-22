@@ -12,7 +12,7 @@ typedef struct DynString_s
 } DynString;
 
 Bool dynStringCreate(const Size intialCapacity, Arena *pArena, DynString *pDynString);
-Bool dynStringAppend(DynString *pDynString, const Char *pStr, const Size strLen);
+Bool dynStringAppend(DynString *pDynString, const Char *pStr);
 Bool dynStringAppendFmt(DynString *pDynString, const Char *pFmt, ...);
 
 #endif /* DYN_STRING_H */
