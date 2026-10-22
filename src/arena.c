@@ -64,7 +64,12 @@ Bool arenaRealloc(Arena *pArena, void **ppData, Size oldSize, Size newSize)
 
 void arenaReset(Arena *pArena)
 {
-    // TODO: resetting logic for all chunks
+    ArenaChunk *pCurrent = pArena->pRootChunk;
+    while (pCurrent != NULL)
+    {
+        pCurrent->used = 0;
+        pCurrent = pCurrent->pNext;
+    }
 }
 
 void arenaDestroy(Arena *pArena)

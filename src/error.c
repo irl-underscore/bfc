@@ -8,6 +8,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+// TODO: Make this better!!! :)
+
 #define MAX_ERROR_FMT_LEN 8
 #define MAX_ERROR_BUF_LEN 128
 #define MAX_ERROR_COUNT 16
