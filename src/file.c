@@ -12,18 +12,12 @@
     #include <unistd.h>
 #endif /*os */
 
+static int _getOFlags(FileMode fileModes);
 
-Bool openFile(const char *__restrict pFileName, const FileMode fileMode, File *__restrict pFile)
+Bool openFile(const char *__restrict pFileName, const FileMode fileModes, File *__restrict pFile)
 {
 #if defined (OS_LINUX) || defined (OS_APPLE)
-    static const int _oFlagTable[] = {
-        [FILE_MODE_READ] = O_RDONLY,
-        [FILE_MODE_WRITE] = O_WRONLY,
-        [FILE_MODE_READ_WRITE] = O_RDWR,
-        [FILE_MODE_CREATE] = O_CREAT
-    };
-
-    pFile->fd = open(pFileName, _oFlagTable[fileMode]);
+    pFile->fd = open(pFileName, _getOFlags(fileModes));
     if (pFile->fd == -1)
     {
         emitStdError();
@@ -83,4 +77,26 @@ Bool closeFile(File *pFile)
     pFile->fd = -1;
     return TRUE;
 #endif /* os */
+}
+
+static int _getOFlags(FileMode fileModes)
+{
+    int oFlags = 0;
+    static int _oFlagTable[] = {
+        [0] = -1,
+        [FILE_MODE_READ] = O_RDONLY,
+        [FILE_MODE_WRITE] = O_WRONLY,
+        [FILE_MODE_CREATE] = O_CREAT
+    };
+
+    for (U8 i = 0; i < _FILE_MODE_COUNT; i++)
+    {
+        int oFlag = fileModes & (1 << i);
+        if (_oFlagTable[oFlag] != -1)
+        {
+            oFlags |= _oFlagTable[oFlag];
+        }
+    }
+
+    return oFlags;
 }

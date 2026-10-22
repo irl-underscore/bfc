@@ -24,5 +24,6 @@ int main(int argc, char **ppArgv)
         return 1;
     }
 
+    closeFile(&input);
     return 0;
 }
