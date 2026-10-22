@@ -15,12 +15,11 @@ UNITY_SRC = $(TEST_SRC_DIR)/unity/unity.c
 UNITY_OBJ = $(TEST_BUILD_DIR)/unity.o
 
 test-run: $(TEST_BUILD_DIR) $(TEST_OUTS)
+	$(Q)$(foreach test,$(TEST_OUTS),./$(test) &&) true
 
 $(TEST_BUILD_DIR)/test_%: $(TEST_SRC_DIR)/test_%.c $(UNITY_OBJ) $(C_OBJS) $(S_OBJS)
 	@echo "LD\t$@"
 	$(Q)$(LD) $^ -o $@ $(CFLAGS) $(LFLAGS)
-	@echo "RUN\t$@"
-	$(Q)./$@
 
 $(UNITY_OBJ): $(UNITY_SRC)
 	@echo "CC\t$@"

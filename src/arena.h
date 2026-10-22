@@ -5,13 +5,14 @@
 typedef struct ArenaChunk_s
 {
     Size used;
+    Size capacity;
     struct ArenaChunk_s *pNext;
     Byte data[];
 } ArenaChunk;
 
 typedef struct Arena_s
 {
-    Size capacity;
+    Size baseCapacity;
     ArenaChunk *pRootChunk;
 } Arena;
 

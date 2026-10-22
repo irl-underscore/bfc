@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 static ArenaChunk *_getFreeChunk(Arena *pArena, Size neededSize);
-static Bool _appendArenaChunk(Arena *pArena);
+static Bool _appendArenaChunk(Arena *pArena, Size size);
 
 Bool arenaCreate(Size capacity, Arena *pArena)
 {
@@ -21,8 +21,9 @@ Bool arenaCreate(Size capacity, Arena *pArena)
         return FALSE;
     }
 
+    pArena->pRootChunk->capacity = capacity;
     pArena->pRootChunk->used = 0;
-    pArena->capacity = capacity;
+    pArena->baseCapacity = capacity;
     pArena->pRootChunk->pNext = NULL;
     return TRUE;
 }
@@ -32,7 +33,9 @@ void *arenaAllocate(Arena *pArena, Size size)
     ArenaChunk *pTargetChunk = _getFreeChunk(pArena, size);
     if (UNLIKELY(pTargetChunk == NULL))
     {
-        if (_appendArenaChunk(pArena) == FALSE) return NULL;
+        if (_appendArenaChunk(pArena, size) == FALSE) return NULL;
+
+        pTargetChunk = _getFreeChunk(pArena, size);
     }
 
     UPtr absAlignedAddr = ALIGN_UP((UPtr)(&pTargetChunk->data[pTargetChunk->used]), NATURAL_ALIGN(size));
@@ -47,7 +50,7 @@ Bool arenaRealloc(Arena *pArena, void **ppData, Size oldSize, Size newSize)
     ArenaChunk *pCurrent = pArena->pRootChunk;
     while (pCurrent != NULL)
     {
-        if ((&pCurrent->data[0]) - oldSize == *ppData && pArena->capacity - pCurrent->used > newSize - oldSize)
+        if ((&pCurrent->data[0]) - oldSize == *ppData && pCurrent->capacity - pCurrent->used > newSize - oldSize)
         {
             pCurrent->used += newSize - oldSize;
             return TRUE;
@@ -85,7 +88,7 @@ static ArenaChunk *_getFreeChunk(Arena *pArena, Size neededSize)
         UPtr abdAlignedAddr = ALIGN_UP((UPtr)&pCurrent->data[pCurrent->used], NATURAL_ALIGN(neededSize));
         Size align = abdAlignedAddr - (UPtr)&pCurrent->data[pCurrent->used];
         Size alignedNeededSize = neededSize + align;
-        if (pArena->capacity - pCurrent->used > alignedNeededSize) goto _success;
+        if (pCurrent->capacity - pCurrent->used > alignedNeededSize) goto _success;
 
         pCurrent = pCurrent->pNext;
     }
@@ -96,7 +99,7 @@ _success:
     return pCurrent;
 }
 
-static Bool _appendArenaChunk(Arena *pArena)
+static Bool _appendArenaChunk(Arena *pArena, Size size)
 {
     ArenaChunk *pCurrent = pArena->pRootChunk;
     ArenaChunk *pLast = NULL;
@@ -108,13 +111,20 @@ static Bool _appendArenaChunk(Arena *pArena)
 
     if (pLast == NULL) return FALSE;
 
-    ArenaChunk *pNewChunk = mmap(NULL, sizeof(ArenaChunk) + pArena->capacity, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANON, -1, 0);
+    Size newCapacity = pArena->baseCapacity;
+    if (size > pArena->baseCapacity)
+    {
+        newCapacity += (size >> 1) + size;
+    }
+
+    ArenaChunk *pNewChunk = mmap(NULL, sizeof(ArenaChunk) + newCapacity, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANON, -1, 0);
     if (pNewChunk == MAP_FAILED)
     {
         emitStdError();
         return FALSE;
     }
 
+    pNewChunk->capacity = newCapacity;
     pNewChunk->used = 0;
     pNewChunk->pNext = NULL;
     pLast->pNext = pNewChunk;
