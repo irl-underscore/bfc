@@ -1,4 +1,5 @@
 #include "dyn_string.h"
+#include "arena.h"
 #include "base_types.h"
 #include "error.h"
 
@@ -9,9 +10,9 @@
 
 static Bool _dynStringResize(DynString *pDynString);
 
-Bool dynStringCreate(const Size intialCapacity, DynString *pDynString)
+Bool dynStringCreate(const Size intialCapacity, Arena *pArena, DynString *pDynString)
 {
-    pDynString->pData = malloc(intialCapacity);
+    pDynString->pData = arenaAllocate(pArena, intialCapacity);
     if (pDynString->pData == NULL)
     {
         emitStdError();
@@ -20,6 +21,7 @@ Bool dynStringCreate(const Size intialCapacity, DynString *pDynString)
 
     pDynString->capacity = intialCapacity;
     pDynString->used = 0;
+    pDynString->pArena = pArena;
     return TRUE;
 }
 
@@ -60,14 +62,7 @@ void dynStringDestroy(DynString *pDynString)
 static Bool _dynStringResize(DynString *pDynString)
 {
     Size newCapacity = (pDynString->capacity >> 1) + pDynString->capacity;
-    Char *pTemp = realloc(pDynString->pData, newCapacity);
-    if (!pTemp)
-    {
-        emitStdError();
-        return FALSE;
-    }
-
-    pDynString->pData = pTemp;
+    arenaRealloc(pDynString->pArena, (void**)&pDynString->pData, pDynString->capacity, newCapacity); // error handling comes later
     pDynString->capacity = newCapacity;
     return TRUE;
 }
