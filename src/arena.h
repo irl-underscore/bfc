@@ -9,7 +9,7 @@ typedef struct Arena_s
     Byte *pData;
 } Arena;
 
-Bool arenaCreate(Size initialSize, Arena *pDst);
+Bool arenaCreate(Size initialSize, Arena *pArena);
 void *arenaAllocate(Arena *pArena, Size size);
 Bool arenaRealloc(Arena *pArena, void **ppData, Size oldSize, Size newSize);
 void arenaReset(Arena *pArena);

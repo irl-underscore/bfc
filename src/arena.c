@@ -8,18 +8,18 @@
 #include <sys/mman.h>
 #include <stdlib.h>
 
-Bool arenaCreate(Size initialSize, Arena *pDst)
+Bool arenaCreate(Size initialSize, Arena *pArena)
 {
-    pDst->pData = mmap(NULL, initialSize, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANON, -1, 0);
-    if (UNLIKELY(pDst->pData == MAP_FAILED))
+    pArena->pData = mmap(NULL, initialSize, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANON, -1, 0);
+    if (UNLIKELY(pArena->pData == MAP_FAILED))
     {
         emitStdError();
-        pDst->pData = NULL;
+        pArena->pData = NULL;
         return FALSE;
     }
 
-    pDst->capacity = initialSize;
-    pDst->used = 0;
+    pArena->capacity = initialSize;
+    pArena->used = 0;
     return TRUE;
 }
 
