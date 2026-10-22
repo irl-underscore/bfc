@@ -22,4 +22,10 @@
     #define OS_WINDOWS 1
 #endif /* os */
 
+#if !defined (_TEST)
+    #define main main
+#else
+    #define main mainFunc
+#endif /* _TEST */
+
 #endif /* DEFS_H */
