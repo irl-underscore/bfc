@@ -23,8 +23,9 @@ void test_init(void)
     TEST_ASSERT_EQUAL(FALSE, dynStringCreate(0, &stringArena, &str));
     TEST_ASSERT_EQUAL(TRUE, dynStringCreate(1, &stringArena, &str));
     TEST_ASSERT_EQUAL(TRUE, dynStringAppend(&str, "Hello"));
-    TEST_ASSERT_EQUAL(TRUE, dynStringAppendFmt(&str, " W%s", "orld"));
+    TEST_ASSERT_EQUAL(TRUE, dynStringAppendFmt(&str, " %s", "World"));
     TEST_ASSERT_EQUAL_STRING("Hello World", str.pData);
+    arenaReset(&stringArena);
 }
 
 int main(void)

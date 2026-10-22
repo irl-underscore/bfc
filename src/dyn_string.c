@@ -2,6 +2,7 @@
 #include "arena.h"
 #include "base_types.h"
 #include "error.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -42,6 +43,8 @@ Bool dynStringAppendFmt(DynString *pDynString, const Char *pFmt, ...)
     va_list args;
     va_start(args, pFmt);
     Size strLen = vsnprintf(NULL, 0, pFmt, args);
+    strLen++;
+    TEST_LOG_FMT("strlen: %zu", strLen);
     va_end(args);
     Size neededCapacity = pDynString->used + strLen;
     if (neededCapacity >= pDynString->capacity)
